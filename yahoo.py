@@ -2,8 +2,6 @@ from yahoofinancials import YahooFinancials
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import json
-
 
 ticker = 'UFI'
 yf = YahooFinancials(ticker)
