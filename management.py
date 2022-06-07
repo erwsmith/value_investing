@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 
 
-bs_table = pd.read_csv( "/Users/Eric/repos/value_investing/balance_statment.csv", index_col=0)
-cf_table = pd.read_csv( "/Users/Eric/repos/value_investing/cash_flow.csv", index_col=0)
-is_table = pd.read_csv( "/Users/Eric/repos/value_investing/income_statement.csv", index_col=0)
+bs_table = pd.read_csv("/Users/Eric/repos/value_investing/balance_statment.csv", index_col=0)
+cf_table = pd.read_csv("/Users/Eric/repos/value_investing/cash_flow.csv", index_col=0)
+is_table = pd.read_csv("/Users/Eric/repos/value_investing/income_statement.csv", index_col=0)
 
 
 # DEBT TO EQUITY RATIO

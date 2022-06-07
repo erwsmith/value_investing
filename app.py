@@ -69,21 +69,22 @@ def index():
     return render_template("index.html")
 
 
-# Management function
-@app.route("/management", methods=["GET", "POST"])
+@app.route("/evaluate", methods=["GET", "POST"])
 @login_required
-def management():
+def evaluate():
     if request.method == "GET":
-        return render_template("management.html")
+        return render_template("evaluate.html")
 
-
-@app.route("/history")
-@login_required
-def history():
-    """Show history of transactions"""
-    # create sql table to store all transactions
-    # symbol, buy/sell, number of shares, cost per share, total cost
-    return render_template("history.html")
+    if request.method == "POST":
+        if lookup(request.form.get("symbol")):
+            stock_quote = lookup(request.form.get("symbol"))
+            name = stock_quote["name"]
+            price = usd(stock_quote["price"])
+            symbol = stock_quote["symbol"]
+            return render_template("evaluated.html", name=name, price=price, symbol=symbol)
+        else:
+            # flash("Enter a valid symbol.")
+            return apology("Not a valid symbol", 400)
 
 
 @app.route("/login", methods=["GET", "POST"])
