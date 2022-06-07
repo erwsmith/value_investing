@@ -21,3 +21,36 @@ nav .navbar-brand .green
 {
     color: #2e944b;
 }
+
+h1 {
+    text-align: justify;
+    max-width: 750px;
+    margin: auto;
+}
+
+h3 {
+    text-align: justify;
+    max-width: 750px;
+    margin: auto;
+}
+
+p {
+    text-align: justify;
+    max-width: 750px;
+    margin: auto;
+}
+
+.bod {
+    text-align: justify;
+    max-width: 750px;
+    margin: auto;
+}
+
+blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    quotes: "\201C""\201D""\2018""\2019";
+}
+
