@@ -11,4 +11,5 @@ data['de_ratio'] = data['totalLiab'] / data['totalStockholderEquity']
 col = data['de_ratio'].agg('mean').transpose()
 
 result = (col < 5) & (col > 0)
+
 print(result)
