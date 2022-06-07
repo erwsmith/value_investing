@@ -15,11 +15,11 @@ Value investing requires analysis of the financial position of a company using 5
 - Scrape public company data from [the SEC website](https://www.sec.gov/dera/data/financial-statement-data-sets.html). 10-k filings from the last 10 years should be downloaded and parsed if available. 
 
 `management`
-- Does the CEO buy stocks of the company? 
-- Does the CEO own a large amount of stock?
 - DE Ratio (0 < total liabilities/total shareholders’ equities < 5).
 - Current Ratio (current assets/current liabilities > 1). 
 - Durability (Long term debt/annual free cash flow < 3).
+- Does the CEO buy stocks of the company? 
+- Does the CEO own a large amount of stock?
 
 `key_metrics`
 - Calculate the intrinsic value of a company based on the data available. 

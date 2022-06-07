@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Portfolio
+    home
 {% endblock %}
 
 {% block main %}
@@ -18,7 +18,7 @@
         </thead>
 
        <tbody>
-            {% for row in rows %}
+            <!-- {% for row in rows %}
                 <tr>
                     <th class="text-start">{{ row.symbol }}</th>
                     <th class="text-start">{{ row.name }}</th>
@@ -26,13 +26,13 @@
                     <th class="text-end">{{ row.cost | usd }}</th>
                     <th class="text-end">{{ row.value | usd }}</th>
                 </tr>
-            {% endfor %}
+            {% endfor %} -->
         </tbody>
 
         <tfoot>
             <tr>
                 <td class="border-0 fw-bold text-end" colspan="4">Cash</td>
-                <td class="border-0 text-end">{{ cash }}</td>
+                <!-- <td class="border-0 text-end">{{ cash }}</td> -->
             </tr>
             <tr>
                 <td class="border-0 fw-bold text-end" colspan="4">TOTAL</td>

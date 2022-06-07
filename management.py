@@ -16,8 +16,7 @@ de_table.index.name = 'date'
 de_table.sort_index(ascending=True, inplace=True)
 de_table = de_table.transpose()
 
-# create pass/fail bool for acceptable de ratio
-# a good de ratio is between 0 and 5
+# pass/fail bool for average de ratio, a good de ratio is between 0 and 5
 de_table['pass (0<de<5)'] = (de_table.loc['de_ratio'].mean() > 0) & (de_table.loc['de_ratio'].mean() < 5)
 print(de_table)
 
@@ -30,8 +29,8 @@ current_table.index.name = 'date'
 current_table.sort_index(ascending=True, inplace=True)
 current_table = current_table.transpose()
 
-# pass/fail bool for current ratio; a good current ratio is > 1
-current_table['pass (current>1)'] = current_table.loc['current_ratio'].mean() > 1
+# pass/fail bool for average current ratio; a good current ratio is > 1
+current_table['pass (>1)'] = current_table.loc['current_ratio'].mean() > 1
 print(current_table)
 
 
@@ -44,4 +43,7 @@ durability_table['durability'] = bs_table['longTermDebt'] / (cf_table['totalCash
 durability_table.index.name = 'date'
 durability_table.sort_index(ascending=True, inplace=True)
 durability_table = durability_table.transpose()
+
+# pass/fail bool for average durability; good durability is < 3
+durability_table['pass (<3)'] = durability_table.loc['durability'].mean() < 3
 print(durability_table)
