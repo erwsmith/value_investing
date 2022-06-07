@@ -18,8 +18,7 @@ Value investing requires analysis of the financial position of a company using 5
 - Does the CEO buy stocks of the company? 
 - Does the CEO own a large amount of stock?
 - DE Ratio (0 < total liabilities/total shareholders’ equities < 5).
-- Current Ratio (short term assets/short term liabilities > 1).
-- Liquidity Ratio (current assets/current liabilities > 2).
+- Current Ratio (current assets/current liabilities > 1). 
 - Durability (Long term debt/annual free cash flow < 3).
 
 `key_metrics`

@@ -31,6 +31,7 @@ for d in ticker_is:
 is_table = pd.concat(income_statement_list)
 is_table.to_csv("income_statment.csv")
 
+
 # CASH FLOW DATA
 cash_flow = yf.get_financial_stmts('annual', 'cash')
 ticker_cf = cash_flow['cashflowStatementHistory'][ticker]
