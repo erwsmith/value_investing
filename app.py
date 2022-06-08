@@ -4,32 +4,12 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from helpers import apology, login_required, lookup, usd
+from configparser import ConfigParser
+from helpers import apology, login_required, lookup, lookup_fv, usd
 
 '''
-export API_KEY=pk_5030d7a395ab442aaf83ee26aae059ef
-
-DELETE FROM holdings;
-UPDATE users SET cash = 10000 WHERE id=11;
+TODO: talk to Nicki about postman
 '''
-
-# finance.db schema:
-# CREATE TABLE users (
-# id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-# username TEXT NOT NULL,
-# hash TEXT NOT NULL,
-# cash NUMERIC NOT NULL DEFAULT 10000.00);
-# CREATE TABLE sqlite_sequence(name,seq);
-# CREATE UNIQUE INDEX username ON users (username);
-
-# CREATE TABLE holdings
-# (symbol TEXT NOT NULL,
-# cost NUMERIC NOT NULL,
-# shares INTEGER NOT NULL,
-# value NUMERIC NOT NULL,
-# owner_id INTEGER NOT NULL,
-# FOREIGN KEY(owner_id) REFERENCES users(id));
 
 # Configure application
 app = Flask(__name__)
@@ -47,6 +27,11 @@ Session(app)
 
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
+
+# get API_KEY from local .cfg file
+config = ConfigParser()
+config.read('/Users/Eric/config/keys_config.cfg')
+API_KEY = config.get('iex', 'publishable_token')
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
