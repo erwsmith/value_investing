@@ -62,30 +62,30 @@ def lookup(symbol):
         return None
 
 
-def lookup_fv(symbol):
-    """Look up time series fundamental valuations for symbol."""
+# def lookup_fv(symbol):
+#     """Look up time series fundamental valuations for symbol."""
 
-    # Contact API
-    try:
-        api_key = os.environ.get("API_KEY")
-        url = f"https://cloud.iexapis.com/stable/time-series/FUNDAMENTAL_VALUATIONS/{urllib.parse.quote_plus(symbol)}/quote?token={api_key}"
-        response = requests.get(url)
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
+#     # Contact API
+#     try:
+#         api_key = os.environ.get("API_KEY")
+#         url = f"https://cloud.iexapis.com/stable/time-series/FUNDAMENTAL_VALUATIONS/{urllib.parse.quote_plus(symbol)}/ttm?token={api_key}"
+#         response = requests.get(url)
+#         response.raise_for_status()
+#     except requests.RequestException:
+#         return None
 
-    # Parse response
-    try:
-        quote = response.json()
-        return {
-            "bookValuePerShare": quote["bookValuePerShare"],
-            "currentRatio": quote["currentRatio"],
-            "debtToEquity": quote["debtToEquity"],
-            "freeCashFlow": quote["freeCashFlow"],
-            "roic": quote["roic"]
-        }
-    except (KeyError, TypeError, ValueError):
-        return None
+#     # Parse response
+#     try:
+#         quote = response.json()
+#         return {
+#             "bookValuePerShare": quote["bookValuePerShare"],
+#             "currentRatio": quote["currentRatio"],
+#             "debtToEquity": quote["debtToEquity"],
+#             "freeCashFlow": quote["freeCashFlow"],
+#             "roic": quote["roic"]
+#         }
+#     except (KeyError, TypeError, ValueError):
+#         return None
 
 
 def usd(value):

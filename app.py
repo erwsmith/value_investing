@@ -61,15 +61,33 @@ def evaluate():
         return render_template("evaluate.html")
 
     if request.method == "POST":
-        if lookup(request.form.get("symbol")):
-            stock_quote = lookup(request.form.get("symbol"))
-            name = stock_quote["name"]
-            price = usd(stock_quote["price"])
-            symbol = stock_quote["symbol"]
-            return render_template("evaluated.html", name=name, price=price, symbol=symbol)
+        sym = request.form.get("symbol")
+
+        # if lookup(sym) and lookup_fv(sym):
+        if lookup_fv(sym):
+            
+            # stock_quote = lookup(sym)
+            # name = stock_quote["name"]
+            # price = usd(stock_quote["price"])
+            # symbol = stock_quote["symbol"]
+
+            fv = lookup_fv(sym)
+            bookValuePerShare = fv["bookValuePerShare"],
+            currentRatio = fv["currentRatio"],
+            debtToEquity = fv["debtToEquity"],
+            freeCashFlow = fv["freeCashFlow"],
+            roic = fv["roic"]
+
+            # return render_template("evaluated.html", name=name, price=price, symbol=symbol, 
+            #                        bookValuePerShare=bookValuePerShare, currentRatio=currentRatio, 
+            #                        debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, roic=roic) 
+
+            return render_template("evaluated.html", bookValuePerShare=bookValuePerShare, 
+                                   currentRatio=currentRatio, debtToEquity=debtToEquity, 
+                                   freeCashFlow=freeCashFlow, roic=roic) 
         else:
             # flash("Enter a valid symbol.")
-            return apology("Not a valid symbol", 400)
+            return apology("Failed request", 400)
 
 
 @app.route("/login", methods=["GET", "POST"])
