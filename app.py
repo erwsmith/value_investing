@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup_balance_sheet, lookup_cash_flow, lookup_income_statement, usd
+from helpers import apology, login_required, lookup_balance_sheet, read_balance_sheet, lookup_cash_flow, lookup_income_statement, usd
 
 
 # Configure application
@@ -71,9 +71,13 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-        if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
-            flash("Request succeeded.")
-            return render_template("evaluate.html")
+        # if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
+        #     flash("Request succeeded.")
+
+        lookup_balance_sheet(sym)
+        df = read_balance_sheet(sym)
+        return render_template('evaluated.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
+
 
             # balance_data = lookup_balance_sheet(sym)
             # cash_flow_data = lookup_cash_flow(sym)
@@ -95,9 +99,9 @@ def evaluate():
             # return render_template("evaluated.html", symbol=sym, currentRatio=currentRatio, 
             #                        debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
             #                        durability=durability) 
-        else:
-            flash("Request failed.")
-            return render_template("evaluate.html")
+        # else:
+        #     flash("Request failed.")
+        #     return render_template("evaluate.html")
             # return apology("Failed request", 400)
 
 
