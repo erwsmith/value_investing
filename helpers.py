@@ -8,7 +8,6 @@ from functools import wraps
 from yahoofinancials import YahooFinancials
 
 
-
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -38,13 +37,17 @@ def login_required(f):
     return decorated_function
 
 
-def lookup(symbol):
-    """Look up quote for symbol."""
+def lookup_balance_sheet(symbol):
+    """
+    Look up balance sheet data for symbol.
+    """
 
-    # Contact API
+    # Contact alphavantage API
     try:
         api_key = os.environ.get("API_KEY")
-        url = f"https://cloud.iexapis.com/stable/stock/{urllib.parse.quote_plus(symbol)}/quote?token={api_key}"
+        sym = urllib.parse.quote_plus(symbol)
+        func = "BALANCE_SHEET"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
         response = requests.get(url)
         response.raise_for_status()
     except requests.RequestException:
@@ -52,40 +55,42 @@ def lookup(symbol):
 
     # Parse response
     try:
-        quote = response.json()
+        balance_sheet = response.json()
         return {
-            "name": quote["companyName"],
-            "price": float(quote["latestPrice"]),
-            "symbol": quote["symbol"]
+            "totalLiabilities": balance_sheet["totalLiabilities"],
+            "totalShareholderEquity": balance_sheet["totalShareholderEquity"],
+            "totalCurrentLiabilities": balance_sheet["totalCurrentLiabilities"],
+            "totalCurrentAssets": balance_sheet["totalCurrentAssets"],
+            "longTermDebt": balance_sheet["longTermDebt"]
         }
     except (KeyError, TypeError, ValueError):
         return None
 
+def lookup_cash_flow(symbol):
+    """
+    lookup cash flow data for symbol
+    """
 
-# def lookup_fv(symbol):
-#     """Look up time series fundamental valuations for symbol."""
+    # Contact alphavantage API
+    try:
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "CASH_FLOW"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
 
-#     # Contact API
-#     try:
-#         api_key = os.environ.get("API_KEY")
-#         url = f"https://cloud.iexapis.com/stable/time-series/FUNDAMENTAL_VALUATIONS/{urllib.parse.quote_plus(symbol)}/ttm?token={api_key}"
-#         response = requests.get(url)
-#         response.raise_for_status()
-#     except requests.RequestException:
-#         return None
-
-#     # Parse response
-#     try:
-#         quote = response.json()
-#         return {
-#             "bookValuePerShare": quote["bookValuePerShare"],
-#             "currentRatio": quote["currentRatio"],
-#             "debtToEquity": quote["debtToEquity"],
-#             "freeCashFlow": quote["freeCashFlow"],
-#             "roic": quote["roic"]
-#         }
-#     except (KeyError, TypeError, ValueError):
-#         return None
+    # Parse response
+    try:
+        cash_flow = response.json()
+        return {
+            "operatingCashflow": cash_flow["operatingCashflow"],
+            "capitalExpenditures": cash_flow["capitalExpenditures"],
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def usd(value):

@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup, lookup_fv, usd
+from helpers import apology, login_required, lookup_balance_sheet, lookup_cash_flow, usd
 
 '''
 TODO: talk to Nicki about postman
@@ -31,7 +31,7 @@ db = SQL("sqlite:///finance.db")
 # get API_KEY from local .cfg file
 config = ConfigParser()
 config.read('/Users/Eric/config/keys_config.cfg')
-API_KEY = config.get('iex', 'publishable_token')
+API_KEY = config.get('alphavantage', 'apikey')
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -53,6 +53,17 @@ def index():
     """Show project readme"""
     return render_template("index.html")
 
+# Evaluate 
+# DEBT TO EQUITY RATIO
+# TOTAL LIABILITIES / TOTAL SHAREHOLDER EQUITY
+
+# CURRENT RATIO
+# CURRENT ASSETS / CURRENT LIABILITIES
+
+# DURABILITY
+# LONG TERM DEBT / FREE CASH FLOW
+# freeCashFlow = operatingCashflow (cash flow) - capitalExpenditures (cash flow)
+# durability = longTermDebt (balance statement) / freeCashFlow
 
 @app.route("/evaluate", methods=["GET", "POST"])
 @login_required
@@ -63,31 +74,32 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-        # if lookup(sym) and lookup_fv(sym):
-        if lookup_fv(sym):
+        if lookup_balance_sheet(sym) and lookup_cash_flow(sym):
+
+            balance_data = lookup_balance_sheet(sym)
+            cash_flow_data = lookup_cash_flow(sym)
+
+            totalLiabilities = balance_data["totalLiabilities"]
+            totalShareholderEquity = balance_data["totalShareholderEquity"]
+            totalCurrentAssets = balance_data["totalCurrentAssets"]
+            totalCurrentLiabilities = balance_data["totalCurrentLiabilities"]
+            longTermDebt = balance_data["longTermDebt"]
             
-            # stock_quote = lookup(sym)
-            # name = stock_quote["name"]
-            # price = usd(stock_quote["price"])
-            # symbol = stock_quote["symbol"]
+            operatingCashflow = cash_flow_data["operatingCashflow"]
+            capitalExpenditures = cash_flow_data["capitalExpenditures"]
+            
+            debtToEquity = totalLiabilities / totalShareholderEquity
+            currentRatio = totalCurrentAssets / totalCurrentLiabilities
+            freeCashFlow = operatingCashflow - capitalExpenditures
+            durability = longTermDebt / freeCashFlow
 
-            fv = lookup_fv(sym)
-            bookValuePerShare = fv["bookValuePerShare"],
-            currentRatio = fv["currentRatio"],
-            debtToEquity = fv["debtToEquity"],
-            freeCashFlow = fv["freeCashFlow"],
-            roic = fv["roic"]
-
-            # return render_template("evaluated.html", name=name, price=price, symbol=symbol, 
-            #                        bookValuePerShare=bookValuePerShare, currentRatio=currentRatio, 
-            #                        debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, roic=roic) 
-
-            return render_template("evaluated.html", bookValuePerShare=bookValuePerShare, 
-                                   currentRatio=currentRatio, debtToEquity=debtToEquity, 
-                                   freeCashFlow=freeCashFlow, roic=roic) 
+            return render_template("evaluated.html", symbol=sym, currentRatio=currentRatio, 
+                                   debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
+                                   durability=durability) 
         else:
-            # flash("Enter a valid symbol.")
-            return apology("Failed request", 400)
+            flash("Enter a valid symbol.")
+            return render_template("evaluate.html")
+            # return apology("Failed request", 400)
 
 
 @app.route("/login", methods=["GET", "POST"])
