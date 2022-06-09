@@ -28,10 +28,10 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-# get API_KEY from local .cfg file
-config = ConfigParser()
-config.read('/Users/Eric/config/keys_config.cfg')
-API_KEY = config.get('alphavantage', 'apikey')
+# # get API_KEY from local .cfg file
+# config = ConfigParser()
+# config.read('/Users/Eric/config/keys_config.cfg')
+# API_KEY = config.get('alphavantage', 'API_KEY')
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -97,7 +97,7 @@ def evaluate():
                                    debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
                                    durability=durability) 
         else:
-            flash("Enter a valid symbol.")
+            flash("Request failed.")
             return render_template("evaluate.html")
             # return apology("Failed request", 400)
 

@@ -41,7 +41,6 @@ def lookup_balance_sheet(symbol):
     """
     Look up balance sheet data for symbol.
     """
-
     # Contact alphavantage API
     try:
         api_key = os.environ.get("API_KEY")
@@ -70,7 +69,6 @@ def lookup_cash_flow(symbol):
     """
     lookup cash flow data for symbol
     """
-
     # Contact alphavantage API
     try:
         api_key = os.environ.get("API_KEY")
