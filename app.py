@@ -5,11 +5,8 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup_balance_sheet, lookup_cash_flow, usd
+from helpers import apology, login_required, lookup_balance_sheet, lookup_cash_flow, lookup_income_statement, usd
 
-'''
-TODO: talk to Nicki about postman
-'''
 
 # Configure application
 app = Flask(__name__)
@@ -28,10 +25,10 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-# # get API_KEY from local .cfg file
-# config = ConfigParser()
-# config.read('/Users/Eric/config/keys_config.cfg')
-# API_KEY = config.get('alphavantage', 'API_KEY')
+# get API_KEY from local .cfg file
+config = ConfigParser()
+config.read('/Users/Eric/config/keys_config.cfg')
+API_KEY = config.get('alphavantage', 'API_KEY')
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -74,28 +71,30 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-        if lookup_balance_sheet(sym) and lookup_cash_flow(sym):
+        if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
+            flash("Request succeeded.")
+            return render_template("evaluate.html")
 
-            balance_data = lookup_balance_sheet(sym)
-            cash_flow_data = lookup_cash_flow(sym)
+            # balance_data = lookup_balance_sheet(sym)
+            # cash_flow_data = lookup_cash_flow(sym)
 
-            totalLiabilities = balance_data["totalLiabilities"]
-            totalShareholderEquity = balance_data["totalShareholderEquity"]
-            totalCurrentAssets = balance_data["totalCurrentAssets"]
-            totalCurrentLiabilities = balance_data["totalCurrentLiabilities"]
-            longTermDebt = balance_data["longTermDebt"]
+            # totalLiabilities = balance_data["totalLiabilities"]
+            # totalShareholderEquity = balance_data["totalShareholderEquity"]
+            # totalCurrentAssets = balance_data["totalCurrentAssets"]
+            # totalCurrentLiabilities = balance_data["totalCurrentLiabilities"]
+            # longTermDebt = balance_data["longTermDebt"]
             
-            operatingCashflow = cash_flow_data["operatingCashflow"]
-            capitalExpenditures = cash_flow_data["capitalExpenditures"]
+            # operatingCashflow = cash_flow_data["operatingCashflow"]
+            # capitalExpenditures = cash_flow_data["capitalExpenditures"]
             
-            debtToEquity = totalLiabilities / totalShareholderEquity
-            currentRatio = totalCurrentAssets / totalCurrentLiabilities
-            freeCashFlow = operatingCashflow - capitalExpenditures
-            durability = longTermDebt / freeCashFlow
+            # debtToEquity = totalLiabilities / totalShareholderEquity
+            # currentRatio = totalCurrentAssets / totalCurrentLiabilities
+            # freeCashFlow = operatingCashflow - capitalExpenditures
+            # durability = longTermDebt / freeCashFlow
 
-            return render_template("evaluated.html", symbol=sym, currentRatio=currentRatio, 
-                                   debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
-                                   durability=durability) 
+            # return render_template("evaluated.html", symbol=sym, currentRatio=currentRatio, 
+            #                        debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
+            #                        durability=durability) 
         else:
             flash("Request failed.")
             return render_template("evaluate.html")
