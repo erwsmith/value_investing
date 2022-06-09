@@ -55,7 +55,18 @@ def lookup_balance_sheet(symbol):
 
     except requests.RequestException:
         return None
-    
+
+
+def read_balance_sheet(sym):
+    filepath = f"json_files/balance_sheet_{sym}.json"
+    with open(filepath, "r") as f: 
+        data = f.read()
+
+    balance_sheet = json.loads(data)
+    annual_reports = balance_sheet["annualReports"]
+    df = pd.json_normalize(annual_reports)
+    return(df)
+
 
 def lookup_cash_flow(symbol):
     """
