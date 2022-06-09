@@ -6,14 +6,19 @@
 
 {% block main %}
 
-    <!-- <div>A share of {{ name }} ({{ symbol }}) costs {{ price }}</div> -->
+    <!-- <div>A share of {{ name }} ({{ symbol }}) costs {{ price }}</div>
     <div>{{ symbol }}</div>
     <div>Current Ratio: {{ currentRatio }}</div>
     <div>Debt to Equity: {{ debtToEquity }}</div>
-    <!-- <div>Free Cash Flow: {{ freeCashFlow }}</div> -->
-    <!-- <div>Durability: {{ durability }}</div> -->
+    <div>Free Cash Flow: {{ freeCashFlow }}</div>
+    <div>Durability: {{ durability }}</div>
 
-    <!-- <div>Book Value per Share: {{ bookValuePerShare }}</div> -->
-    <!-- <div>Return on Invested Capital: {{ roic }}</div> -->
+    <div>Book Value per Share: {{ bookValuePerShare }}</div>
+    <div>Return on Invested Capital: {{ roic }}</div> -->
+
+    {% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
  
 {% endblock %}
