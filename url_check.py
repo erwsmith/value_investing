@@ -3,30 +3,62 @@ import urllib.parse
 import requests
 import json
 
-def url_check():
-    api_key = os.environ.get("API_KEY")
-    sym = urllib.parse.quote_plus('IBM')
-    func = "BALANCE_SHEET"
-    url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
-    response = requests.get(url)
-    balance_sheet = response.json()
+"""
+testing for successful lookup and json file creation for balance sheet, cash flow, and income statements.
+"""
 
-    with open("balance_sheet.json", "w", encoding="utf-8") as f:
-        json.dump(balance_sheet, f, ensure_ascii=False, indent=4)
+def lookup_balance_sheet():
+    try: 
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus('IBM')
+        func = "BALANCE_SHEET"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        balance_sheet = response.json()
+        with open("balance_sheet.json", "w", encoding="utf-8") as f:
+            json.dump(balance_sheet, f, ensure_ascii=False, indent=4)
 
-    annual_reports = balance_sheet["annualReports"]
-
-    # for report in annual_reports:
-    #     print(report["fiscalDateEnding"], report["totalLiabilities"])
-        
-
-    # return {
-    #     "totalLiabilities": balance_sheet["totalLiabilities"],
-    #     "totalShareholderEquity": balance_sheet["totalShareholderEquity"],
-    #     "totalCurrentLiabilities": balance_sheet["totalCurrentLiabilities"],
-    #     "totalCurrentAssets": balance_sheet["totalCurrentAssets"],
-    #     "longTermDebt": balance_sheet["longTermDebt"]
-    # }
+    except requests.RequestException:
+        return None
 
 
-url_check()
+def lookup_cash_flow(symbol):
+    try:
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "CASH_FLOW"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+        cash_flow = response.json()
+        filepath = f"json_files/cash_flow_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(cash_flow, f, ensure_ascii=False, indent=4)
+
+    except requests.RequestException:
+        return None
+
+
+def lookup_income_statement(symbol):
+    """
+    lookup income statement data for last 5 years and save as .json file
+    """
+    try:
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "INCOME_STATEMENT"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+        income_statement = response.json()
+        filepath = f"json_files/income_statement_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(income_statement, f, ensure_ascii=False, indent=4)
+
+    except requests.RequestException:
+        return None
+
+
+# lookup_balance_sheet("UFI")
+# lookup_cash_flow("UFI")
+# lookup_income_statement("UFI")
