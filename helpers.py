@@ -2,6 +2,7 @@ import os
 import requests
 import urllib.parse
 import pandas as pd
+import json
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -39,9 +40,8 @@ def login_required(f):
 
 def lookup_balance_sheet(symbol):
     """
-    Look up balance sheet data for symbol.
+    Look up balance sheets for last 5 years for symbol and save as .json file
     """
-    # Contact alphavantage API
     try:
         api_key = os.environ.get("API_KEY")
         sym = urllib.parse.quote_plus(symbol)
@@ -49,27 +49,19 @@ def lookup_balance_sheet(symbol):
         url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
         response = requests.get(url)
         response.raise_for_status()
+        balance_sheet = response.json()
+        filepath = f"json_files/balance_sheet_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(balance_sheet, f, ensure_ascii=False, indent=4)
+
     except requests.RequestException:
         return None
-
-    # Parse response
-    try:
-        balance_sheet = response.json()
-        return {
-            "totalLiabilities": balance_sheet["totalLiabilities"],
-            "totalShareholderEquity": balance_sheet["totalShareholderEquity"],
-            "totalCurrentLiabilities": balance_sheet["totalCurrentLiabilities"],
-            "totalCurrentAssets": balance_sheet["totalCurrentAssets"],
-            "longTermDebt": balance_sheet["longTermDebt"]
-        }
-    except (KeyError, TypeError, ValueError):
-        return None
+    
 
 def lookup_cash_flow(symbol):
     """
-    lookup cash flow data for symbol
+    lookup cash flow data for last 5 years and save as .json file
     """
-    # Contact alphavantage API
     try:
         api_key = os.environ.get("API_KEY")
         sym = urllib.parse.quote_plus(symbol)
@@ -77,19 +69,32 @@ def lookup_cash_flow(symbol):
         url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
         response = requests.get(url)
         response.raise_for_status()
+        cash_flow = response.json()
+        filepath = f"json_files/cash_flow_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(cash_flow, f, ensure_ascii=False, indent=4)
+
     except requests.RequestException:
         return None
 
-    # Parse response
+def lookup_income_statement(symbol):
+    """
+    lookup income statement data for last 5 years and save as .json file
+    """
     try:
-        cash_flow = response.json()
-        return {
-            "operatingCashflow": cash_flow["operatingCashflow"],
-            "capitalExpenditures": cash_flow["capitalExpenditures"],
-        }
-    except (KeyError, TypeError, ValueError):
-        return None
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "INCOME_STATEMENT"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+        income_statement = response.json()
+        filepath = f"json_files/income_statement_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(income_statement, f, ensure_ascii=False, indent=4)
 
+    except requests.RequestException:
+        return None
 
 def usd(value):
     """Format value as USD."""
