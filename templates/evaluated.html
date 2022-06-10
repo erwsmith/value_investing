@@ -12,13 +12,15 @@
     <div>Debt to Equity: {{ debtToEquity }}</div>
     <div>Free Cash Flow: {{ freeCashFlow }}</div>
     <div>Durability: {{ durability }}</div>
-
     <div>Book Value per Share: {{ bookValuePerShare }}</div>
     <div>Return on Invested Capital: {{ roic }}</div> -->
 
     {% for table in tables %}
-            {{titles[loop.index]}}
+            <h2>{{ titles[loop.index] }}</h2>
             {{ table|safe }}
     {% endfor %}
+    
+    <hr>
+    <div>Management Check: {{ management_check }}</div>
  
 {% endblock %}
