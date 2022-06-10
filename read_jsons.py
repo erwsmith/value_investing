@@ -1,9 +1,6 @@
-from email.utils import parsedate_to_datetime
+
 import json
 import pandas as pd
-import numpy as np
-from datetime import date
-
 
 # Balance sheet numbers for management: 
 # DEBT TO EQUITY RATIO
