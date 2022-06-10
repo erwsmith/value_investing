@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup_balance_sheet, read_balance_sheet, lookup_cash_flow, lookup_income_statement, usd
+from helpers import apology, login_required, lookup_balance_sheet, read_jsons, lookup_cash_flow, lookup_income_statement, usd
 
 
 # Configure application
@@ -50,17 +50,6 @@ def index():
     """Show project readme"""
     return render_template("index.html")
 
-# Evaluate 
-# DEBT TO EQUITY RATIO
-# TOTAL LIABILITIES / TOTAL SHAREHOLDER EQUITY
-
-# CURRENT RATIO
-# CURRENT ASSETS / CURRENT LIABILITIES
-
-# DURABILITY
-# LONG TERM DEBT / FREE CASH FLOW
-# freeCashFlow = operatingCashflow (cash flow) - capitalExpenditures (cash flow)
-# durability = longTermDebt (balance statement) / freeCashFlow
 
 @app.route("/evaluate", methods=["GET", "POST"])
 @login_required
@@ -73,11 +62,11 @@ def evaluate():
 
         # if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
         #     flash("Request succeeded.")
+        # lookup_balance_sheet(sym)
 
-        lookup_balance_sheet(sym)
-        df = read_balance_sheet(sym)
-        return render_template('evaluated.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
-
+        management_check, df = read_jsons(sym)
+        df.index.name = None
+        return render_template('evaluated.html', management_check=management_check, tables=[df.to_html(classes='data')], titles=["na", f"{sym.upper()} Management"])
 
             # balance_data = lookup_balance_sheet(sym)
             # cash_flow_data = lookup_cash_flow(sym)
