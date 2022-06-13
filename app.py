@@ -74,7 +74,8 @@ def evaluate():
         else:
             management_message = "NOT GOOD"
 
-        return render_template('evaluated.html', management_message=management_message, tables=[df.to_html(classes='data')], titles=["na", f"{sym.upper()} Management"])
+        return render_template('evaluated.html', sym=sym.upper(), management_message=management_message, 
+                               tables=[df.to_html(classes='data')], titles=["na", f"{sym.upper()} Management"])
 
             # balance_data = lookup_balance_sheet(sym)
             # cash_flow_data = lookup_cash_flow(sym)
