@@ -7,15 +7,17 @@ import json
 testing for successful lookup and json file creation for balance sheet, cash flow, and income statements.
 """
 
-def lookup_balance_sheet():
+def lookup_balance_sheet(symbol):
     try: 
         api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus('IBM')
+        sym = urllib.parse.quote_plus(symbol)
         func = "BALANCE_SHEET"
         url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
         response = requests.get(url)
+        response.raise_for_status()
         balance_sheet = response.json()
-        with open("balance_sheet.json", "w", encoding="utf-8") as f:
+        filepath = f"json_files/balance_sheet_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(balance_sheet, f, ensure_ascii=False, indent=4)
 
     except requests.RequestException:
@@ -59,6 +61,7 @@ def lookup_income_statement(symbol):
         return None
 
 
-# lookup_balance_sheet("UFI")
-# lookup_cash_flow("UFI")
-# lookup_income_statement("UFI")
+# sym = "LRCX"
+# lookup_balance_sheet(sym)
+# lookup_cash_flow(sym)
+# lookup_income_statement(sym)
