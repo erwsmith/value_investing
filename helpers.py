@@ -128,9 +128,9 @@ def read_jsons(sym):
     df_balance["fiscalDateEnding"] = pd.to_datetime(df_balance["fiscalDateEnding"])
     df_balance['year'] = pd.DatetimeIndex(df_balance['fiscalDateEnding']).year
     df_balance.set_index("year", inplace=True)
+    df_balance.replace("None", "0", inplace=True)
 
     # Reduce df to have only required columns, cast values as float
-    df_balance.replace("None", "0", inplace=True)
     df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities", 
                              "totalCurrentAssets", "longTermDebt", "capitalLeaseObligations", "shortTermDebt",
                              "commonStock", "retainedEarnings"]]
@@ -157,9 +157,9 @@ def read_jsons(sym):
     df_cash["fiscalDateEnding"] = pd.to_datetime(df_cash["fiscalDateEnding"])
     df_cash['year'] = pd.DatetimeIndex(df_cash['fiscalDateEnding']).year
     df_cash.set_index("year", inplace=True)
+    df_cash.replace("None", "0", inplace=True)
 
     # Reduce df to have only required columns, cast values as float
-    df_cash.replace("None", "0", inplace=True)
     df_cash = df_cash[["operatingCashflow", "capitalExpenditures", "cashflowFromInvestment", "cashflowFromFinancing"]]
     df_cash = df_cash.astype('float')
 
@@ -180,9 +180,9 @@ def read_jsons(sym):
     df_income["fiscalDateEnding"] = pd.to_datetime(df_income["fiscalDateEnding"])
     df_income['year'] = pd.DatetimeIndex(df_income['fiscalDateEnding']).year
     df_income.set_index("year", inplace=True)
+    df_income.replace("None", "0", inplace=True)
 
     # Reduce df to have only required columns, cast values as float
-    df_income.replace("None", "0", inplace=True)
     df_income = df_income[["totalRevenue", "ebit", "ebitda", "incomeTaxExpense", "netIncome", "incomeBeforeTax"]]
     df_income = df_income.astype('float')
 
@@ -193,7 +193,11 @@ def read_jsons(sym):
     # Calculate NOPAT
     # nopat = ebit * (1 - effective_tax_rate)
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
-    
+
+    return df_balance, df_income, df_cash
+
+
+def management(df_balance, df_income, df_cash):
 
     # COMBINE DATAFRAMES
     df = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital"]]
@@ -248,3 +252,6 @@ def read_jsons(sym):
     
     return management_check, df
 
+
+def growth(df_balance, df_income, df_cash):
+    pass
