@@ -63,7 +63,11 @@ def evaluate():
         # if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
         #     flash("Request succeeded.")
         # lookup_balance_sheet(sym)
+
+        # read company json files
         b, i, c = read_jsons(sym)
+
+        # plug parsed json files into mangement function
         management_check, df = management(b, i, c)
 
         # TODO what does this line do?
