@@ -2,22 +2,9 @@
 import json
 import pandas as pd
 
-pd.options.display.float_format = '{:,.2f}'.format
-
-# Balance sheet numbers for management: 
-# DEBT TO EQUITY RATIO
-# TOTAL LIABILITIES / TOTAL SHAREHOLDER EQUITY
-
-# CURRENT RATIO
-# CURRENT ASSETS / CURRENT LIABILITIES
-
-# DURABILITY
-# LONG TERM DEBT / FREE CASH FLOW
-# freeCashFlow = operatingCashflow (cash flow) - capitalExpenditures (cash flow)
-# durability = longTermDebt (balance statement) / freeCashFlow
-
-
 def read_jsons(sym):
+
+    pd.options.display.float_format = '{:,.2f}'.format
 
     # BALANCE SHEET - read and setup dataframe
     bs_filepath = f"json_files/balance_sheet_{sym}.json"
@@ -46,7 +33,6 @@ def read_jsons(sym):
     # Calculate Invested Capital
     cols = ["totalShareholderEquity", "shortTermDebt", "longTermDebt", "capitalLeaseObligations"]
     df_balance["investedCapital"] = df_balance[cols].sum(axis=1)
-    # print(df_balance)
 
 
     # CASH FLOW STATEMENT - read and setup dataframe
@@ -97,8 +83,8 @@ def read_jsons(sym):
     # Calculate NOPAT
     # nopat = ebit * (1 - effective_tax_rate)
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
-    print(df_income)
     
+
     # COMBINE DATAFRAMES
     df = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital"]]
     df = df.join(df_cash[["freeCashFlow", "nonOperatingCash"]]).join(df_income[["nopat"]])
@@ -112,8 +98,13 @@ def read_jsons(sym):
     # Set final columns
     df = df[["de_ratio", "current_ratio", "durability", "roic"]]
 
-    # Sort by year, transpose, and calculate 5 year average values
-    df = df.sort_index().transpose()
+    # Sort by year
+    df = df.sort_index()
+
+    # transpose dataframe
+    df = df.transpose()
+
+    # Calculate 5 year average values
     df["5y_average"] = df.mean(axis=1)
     
     # Create pass/fail column and note colum
@@ -135,11 +126,16 @@ def read_jsons(sym):
     df.loc[["durability"],["pass"]] = durability_avg < 3
     df.loc[["durability"],["note"]] = f"durability > 1"
 
+    # Check average roic
+    roic_avg = df.loc["roic","5y_average"]
+    df.loc[["roic"],["pass"]] = roic_avg > 10
+    df.loc[["roic"],["note"]] = f"roic % > 10"
+
     # Mangement quality check
     management_check = False
     if df.loc["durability","pass"] and df.loc["current_ratio", "pass"] and df.loc["de_ratio", "pass"]:
         management_check = True
 
-    # print(df)
+    print(df)
 
 read_jsons("MSFT")
