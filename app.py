@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup_balance_sheet, read_jsons, lookup_cash_flow, lookup_income_statement, usd, management
+from helpers import apology, login_required, usd, lookup_balance_sheet, lookup_cash_flow, lookup_income_statement, read_jsons, management, growth
 
 
 # Configure application
@@ -67,11 +67,13 @@ def evaluate():
         # read company json files
         b, i, c = read_jsons(sym)
 
-        # plug parsed json files into mangement function
-        management_check, df = management(b, i, c)
+        # plug parsed json files into mangement and growth functions
+        management_check, df_mgt = management(b, i, c)
+        growth_check, df_growth = growth(b, i, c)
 
         # TODO what does this line do?
-        df.index.name = None
+        df_mgt.index.name = None
+        df_growth.index.name = None
 
         if management_check:
             management_message = "GOOD!"
@@ -79,7 +81,8 @@ def evaluate():
             management_message = "NOT GOOD"
 
         return render_template('evaluated.html', sym=sym.upper(), management_message=management_message, 
-                               tables=[df.to_html(classes='data')], titles=["na", f"{sym.upper()} Management"])
+                               tables=[df_mgt.to_html(classes='data'), df_growth.to_html(classes='data')], 
+                               titles=["na", f"{sym.upper()} Management", "Growth"])
 
         # else:
         #     flash("Request failed.")
