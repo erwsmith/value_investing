@@ -2,6 +2,8 @@
 import json
 import pandas as pd
 
+pd.options.display.float_format = '{:,.2f}'.format
+
 # Balance sheet numbers for management: 
 # DEBT TO EQUITY RATIO
 # TOTAL LIABILITIES / TOTAL SHAREHOLDER EQUITY
@@ -25,22 +27,27 @@ def read_jsons(sym):
     # Process data and create clean dataframe
     balance_sheet = json.loads(data)
     annual_reports = balance_sheet["annualReports"]
-    print(annual_reports)
     df_balance = pd.json_normalize(annual_reports)
     df_balance["fiscalDateEnding"] = pd.to_datetime(df_balance["fiscalDateEnding"])
     df_balance['year'] = pd.DatetimeIndex(df_balance['fiscalDateEnding']).year
     df_balance.set_index("year", inplace=True)
-    # print(df_balance)
 
     # Reduce df to have only required columns, cast values as float
     df_balance.replace("None", "0", inplace=True)
-    df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities", "totalCurrentAssets", "longTermDebt", "capitalLeaseObligations"]]
+    df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities", 
+                             "totalCurrentAssets", "longTermDebt", "capitalLeaseObligations", "shortTermDebt",
+                             "commonStock", "retainedEarnings"]]
     df_balance = df_balance.astype('float')
 
     # Calculate de and current ratios:
     df_balance["de_ratio"] = df_balance["totalLiabilities"] / df_balance["totalShareholderEquity"]
     df_balance["current_ratio"] = df_balance["totalCurrentAssets"] / df_balance["longTermDebt"]
-    df_balance["invested_capital"] = df_balance["totalShareholderEquity"] + df_balance["longTermDebt"] + df_balance["capitalLeaseObligations"]
+
+    # Calculate Invested Capital
+    cols = ["totalShareholderEquity", "shortTermDebt", "longTermDebt", "capitalLeaseObligations"]
+    df_balance["investedCapital"] = df_balance[cols].sum(axis=1)
+    # print(df_balance)
+
 
     # CASH FLOW STATEMENT - read and setup dataframe
     cf_filepath = f"json_files/cash_flow_{sym}.json"
@@ -57,13 +64,13 @@ def read_jsons(sym):
 
     # Reduce df to have only required columns, cast values as float
     df_cash.replace("None", "0", inplace=True)
-    df_cash = df_cash[["operatingCashflow", "capitalExpenditures"]]
+    df_cash = df_cash[["operatingCashflow", "capitalExpenditures", "cashflowFromInvestment", "cashflowFromFinancing"]]
     df_cash = df_cash.astype('float')
 
     # Calculate freeCashFlow
     df_cash["freeCashFlow"] = df_cash["operatingCashflow"] - df_cash["capitalExpenditures"]
-    # print(df_cash)
-    
+    df_cash["nonOperatingCash"] = df_cash["cashflowFromInvestment"] + df_cash["cashflowFromFinancing"]
+
 
     # INCOME STATEMENT - read and setup dataframe
     income_filepath = f"json_files/income_statement_{sym}.json"
@@ -80,31 +87,30 @@ def read_jsons(sym):
 
     # Reduce df to have only required columns, cast values as float
     df_income.replace("None", "0", inplace=True)
-    df_income = df_income[["ebit", "incomeTaxExpense", "netIncome"]]
+    df_income = df_income[["totalRevenue", "ebit", "ebitda", "incomeTaxExpense", "netIncome", "incomeBeforeTax"]]
     df_income = df_income.astype('float')
 
     # Calculate effective tax rate
     # effective_tax_rate = incomeTaxExpense / netIncome
-    df_income["effectiveTaxRate"] = df_income["incomeTaxExpense"] / df_income["netIncome"]
+    df_income["effectiveTaxRate"] = df_income["incomeTaxExpense"] / df_income["incomeBeforeTax"]
 
     # Calculate NOPAT
     # nopat = ebit * (1 - effective_tax_rate)
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
-    # print(df_income)
+    print(df_income)
     
     # COMBINE DATAFRAMES
-    df = df_balance[["de_ratio", "current_ratio", "longTermDebt", "invested_capital"]]
-    df = df.join(df_cash[["freeCashFlow"]]).join(df_income[["nopat"]])
+    df = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital"]]
+    df = df.join(df_cash[["freeCashFlow", "nonOperatingCash"]]).join(df_income[["nopat"]])
 
     # Calculate durability
     df["durability"] = df["longTermDebt"] / df["freeCashFlow"]
 
-    # Calculate ROIC
-    df["roic"] = df["nopat"] / df["invested_capital"]
+    # Calculate return on invested capital %
+    df["roic"] = 100 * (df["nopat"] / df["investedCapital"])
 
     # Set final columns
     df = df[["de_ratio", "current_ratio", "durability", "roic"]]
-
 
     # Sort by year, transpose, and calculate 5 year average values
     df = df.sort_index().transpose()
@@ -136,4 +142,4 @@ def read_jsons(sym):
 
     # print(df)
 
-read_jsons("UFI")
+read_jsons("MSFT")
