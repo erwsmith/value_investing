@@ -121,7 +121,7 @@ def read_jsons(sym):
     # Reduce df to have only required columns, cast values as float
     df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities", 
                              "totalCurrentAssets", "longTermDebt", "capitalLeaseObligations", "shortTermDebt",
-                             "commonStock", "retainedEarnings"]]
+                             "commonStock", "retainedEarnings", "commonStockSharesOutstanding"]]
     df_balance = df_balance.astype('float')
 
     # Calculate de and current ratios:
@@ -175,7 +175,6 @@ def read_jsons(sym):
     df_income = df_income.astype('float')
 
     # Calculate effective tax rate
-    # effective_tax_rate = incomeTaxExpense / netIncome
     df_income["effectiveTaxRate"] = df_income["incomeTaxExpense"] / df_income["incomeBeforeTax"]
 
     # Calculate NOPAT
@@ -189,7 +188,7 @@ def management(df_balance, df_income, df_cash):
 
     # COMBINE DATAFRAMES
     df = df_balance[["de_ratio", "current_ratio", "longTermDebt", 
-                     "investedCapital"]].join(df_cash[["freeCashFlow", 
+                     "investedCapital", "commonStockSharesOutstanding"]].join(df_cash[["freeCashFlow", 
                      "nonOperatingCash"]]).join(df_income[["nopat"]])
 
     # Calculate durability
@@ -235,13 +234,48 @@ def management(df_balance, df_income, df_cash):
     df.loc[["roic"],["target"]] = f"roic % > 10"
 
     # Mangement quality check
-    management_check = False
-    if df.loc["durability","pass"] and df.loc["current_ratio", "pass"] and df.loc["de_ratio", "pass"]:
-        management_check = True
-    
+    management_check = df["pass"].all()
+
     return management_check, df
 
 
 def growth(df_balance, df_income, df_cash):
-    df = df_income[["totalRevenue"]]
-    print(df)
+
+    # total revenue (Sales) growth rate
+    df = df_income[["totalRevenue", "netIncome"]].join(df_balance[["commonStockSharesOutstanding", "totalShareholderEquity"]]).join(df_cash[["operatingCashflow"]])
+    df.sort_index(inplace=True)
+
+    # NOTE regarding pandas built-in percent change calculation: 
+    # if the 2 values being compared are negative, and the new value is lower than the old, the output of pct_change() will be positive, which is VERY erroneous
+    # pct_change example: 
+    # df.insert(len(df.columns), "revenue_growth_bad", 100 * df["totalRevenue"].pct_change())
+
+    # Better way of calculating percent change:
+    df.insert(len(df.columns), "revenue_growth", 100 * (df["totalRevenue"] - df["totalRevenue"].shift()) / abs(df["totalRevenue"].shift()))
+
+    # Earnings Per Share Growth Rate.
+    # (net income - preferred dividends) / commonStockSharesOutstanding
+    # TODO preferred dividends? Haven't found yet, but this seems to only make a minor change when looking as MSFT
+    df.insert(len(df.columns), "eps", df["netIncome"] / df["commonStockSharesOutstanding"])
+    df.insert(len(df.columns), "eps_growth", 100 * (df["eps"] - df["eps"].shift()) / abs(df["eps"].shift()))
+    
+    # Equity Growth Rate (BVPS).
+    # totalShareholderEquity / commonStockSharesOutstanding
+    df.insert(len(df.columns), "bvps", df["totalShareholderEquity"] / df["commonStockSharesOutstanding"])
+    df.insert(len(df.columns), "bvps_growth", 100 * (df["bvps"] - df["bvps"].shift()) / abs(df["bvps"].shift()))
+
+    # Operating Cash Flow Growth Rate.
+    # operatingCashflow
+    df.insert(len(df.columns), "cashflow_growth", 100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
+
+    # df_income = df_income[["totalRevenue", "ebit", "ebitda", "incomeTaxExpense", "netIncome", "incomeBeforeTax"]]
+    df = df[["revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
+    df = df.transpose()
+    df.drop([2017], axis=1, inplace=True)
+    df["avg_growth"] = df.mean(axis=1)
+    df["pass"] = df["avg_growth"] > 10
+
+    # Company growth check
+    growth_check = df["pass"].all()
+
+    return growth_check, df
