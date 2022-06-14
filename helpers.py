@@ -100,18 +100,6 @@ def lookup_income_statement(symbol):
         return None
 
 
-# Balance sheet numbers for management: 
-# DEBT TO EQUITY RATIO
-# TOTAL LIABILITIES / TOTAL SHAREHOLDER EQUITY
-
-# CURRENT RATIO
-# CURRENT ASSETS / CURRENT LIABILITIES
-
-# DURABILITY
-# LONG TERM DEBT / FREE CASH FLOW
-# freeCashFlow = operatingCashflow (cash flow) - capitalExpenditures (cash flow)
-# durability = longTermDebt (balance statement) / freeCashFlow
-
 def read_jsons(sym):
 
     pd.options.display.float_format = '{:,.2f}'.format
@@ -200,8 +188,9 @@ def read_jsons(sym):
 def management(df_balance, df_income, df_cash):
 
     # COMBINE DATAFRAMES
-    df = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital"]]
-    df = df.join(df_cash[["freeCashFlow", "nonOperatingCash"]]).join(df_income[["nopat"]])
+    df = df_balance[["de_ratio", "current_ratio", "longTermDebt", 
+                     "investedCapital"]].join(df_cash[["freeCashFlow", 
+                     "nonOperatingCash"]]).join(df_income[["nopat"]])
 
     # Calculate durability
     df["durability"] = df["longTermDebt"] / df["freeCashFlow"]
@@ -254,4 +243,5 @@ def management(df_balance, df_income, df_cash):
 
 
 def growth(df_balance, df_income, df_cash):
-    pass
+    df = df_income[["totalRevenue"]]
+    print(df)
