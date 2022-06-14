@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, lookup_balance_sheet, read_jsons, lookup_cash_flow, lookup_income_statement, usd
+from helpers import apology, login_required, lookup_balance_sheet, read_jsons, lookup_cash_flow, lookup_income_statement, usd, management
 
 
 # Configure application
@@ -63,8 +63,8 @@ def evaluate():
         # if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
         #     flash("Request succeeded.")
         # lookup_balance_sheet(sym)
-
-        management_check, df = read_jsons(sym)
+        b, i, c = read_jsons(sym)
+        management_check, df = management(b, i, c)
 
         # TODO what does this line do?
         df.index.name = None
