@@ -77,26 +77,6 @@ def evaluate():
         return render_template('evaluated.html', sym=sym.upper(), management_message=management_message, 
                                tables=[df.to_html(classes='data')], titles=["na", f"{sym.upper()} Management"])
 
-            # balance_data = lookup_balance_sheet(sym)
-            # cash_flow_data = lookup_cash_flow(sym)
-
-            # totalLiabilities = balance_data["totalLiabilities"]
-            # totalShareholderEquity = balance_data["totalShareholderEquity"]
-            # totalCurrentAssets = balance_data["totalCurrentAssets"]
-            # totalCurrentLiabilities = balance_data["totalCurrentLiabilities"]
-            # longTermDebt = balance_data["longTermDebt"]
-            
-            # operatingCashflow = cash_flow_data["operatingCashflow"]
-            # capitalExpenditures = cash_flow_data["capitalExpenditures"]
-            
-            # debtToEquity = totalLiabilities / totalShareholderEquity
-            # currentRatio = totalCurrentAssets / totalCurrentLiabilities
-            # freeCashFlow = operatingCashflow - capitalExpenditures
-            # durability = longTermDebt / freeCashFlow
-
-            # return render_template("evaluated.html", symbol=sym, currentRatio=currentRatio, 
-            #                        debtToEquity=debtToEquity, freeCashFlow=freeCashFlow, 
-            #                        durability=durability) 
         # else:
         #     flash("Request failed.")
         #     return render_template("evaluate.html")
@@ -151,24 +131,24 @@ def logout():
     return redirect("/")
 
 
-@app.route("/quote", methods=["GET", "POST"])
-@login_required
-def quote():
-    """Get stock quote."""
+# @app.route("/quote", methods=["GET", "POST"])
+# @login_required
+# def quote():
+#     """Get stock quote."""
 
-    if request.method == "GET":
-        return render_template("quote.html")
+#     if request.method == "GET":
+#         return render_template("quote.html")
 
-    if request.method == "POST":
-        if lookup(request.form.get("symbol")):
-            stock_quote = lookup(request.form.get("symbol"))
-            name = stock_quote["name"]
-            price = usd(stock_quote["price"])
-            symbol = stock_quote["symbol"]
-            return render_template("quoted.html", name=name, price=price, symbol=symbol)
-        else:
-            # flash("Enter a valid symbol.")
-            return apology("Not a valid symbol", 400)
+#     if request.method == "POST":
+#         if lookup(request.form.get("symbol")):
+#             stock_quote = lookup(request.form.get("symbol"))
+#             name = stock_quote["name"]
+#             price = usd(stock_quote["price"])
+#             symbol = stock_quote["symbol"]
+#             return render_template("quoted.html", name=name, price=price, symbol=symbol)
+#         else:
+#             # flash("Enter a valid symbol.")
+#             return apology("Not a valid symbol", 400)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -219,50 +199,3 @@ def register():
                 flash("Welcome, new user!")
                 # Redirect user to home page
                 return redirect("/")
-
-
-@app.route("/sell", methods=["GET", "POST"])
-@login_required
-def sell():
-    """Sell shares of stock"""
-    if request.method == "GET":
-        symbols = db.execute("SELECT symbol FROM holdings WHERE owner_id = ?", session["user_id"])
-        return render_template("sell.html", symbols=symbols)
-
-    if request.method == "POST":
-        if lookup(request.form.get("symbol")):
-            stock_quote = lookup(request.form.get("symbol"))
-            name = stock_quote["name"]
-            symbol = stock_quote["symbol"]
-            price = float(stock_quote["price"])
-            shares = float(request.form.get("shares"))
-            ext_cost = float(shares * price)
-            cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
-            shares_owned = db.execute("SELECT shares FROM holdings WHERE owner_id = ? AND symbol = ?",
-                                      session["user_id"], symbol)[0]["shares"]
-            owned_shares_value = db.execute("SELECT value FROM holdings WHERE owner_id = ? AND symbol = ?",
-                                            session["user_id"], symbol)[0]["value"]
-
-            # check if user can afford stocks
-            if shares > shares_owned:
-                return apology("Not enough shares")
-            else:
-                # successful sale, update db: add ext_cost to cash
-                cash += ext_cost
-                db.execute("UPDATE users SET cash = ? WHERE id = ?", cash, session["user_id"])
-                # decrease number of shares held and update value in db
-                shares_owned -= shares
-                owned_shares_value -= ext_cost
-                # get new total value of stocks + cash from db
-                db.execute("UPDATE holdings SET shares = ?, value = ? WHERE owner_id = ? AND symbol = ?",
-                           shares_owned, owned_shares_value, session["user_id"], symbol)
-                db.execute("DELETE FROM holdings WHERE shares = 0")
-                value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?",
-                                             session["user_id"])[0]['SUM(value)']
-                total = cash + value_of_stocks
-
-                rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
-                # flash message when rendering index/portfolio page
-                flash(f"You have successfully sold {int(shares)} shares of {name} for {usd(ext_cost)}!")
-                # redirect user to index/portfolio page
-                return render_template("index.html", cash=usd(cash), total=usd(total), rows=rows)
