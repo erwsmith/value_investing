@@ -61,7 +61,28 @@ def lookup_income_statement(symbol):
         return None
 
 
-# sym = "LRCX"
+def lookup_earnings(symbol):
+    """
+    lookup EPS history and save as .json file
+    """
+    try:
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "EARNINGS"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+        earnings = response.json()
+        filepath = f"json_files/earnings_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(earnings, f, ensure_ascii=False, indent=4)
+
+    except requests.RequestException:
+        return None
+
+
+sym = "LRCX"
 # lookup_balance_sheet(sym)
 # lookup_cash_flow(sym)
 # lookup_income_statement(sym)
+lookup_earnings(sym)
