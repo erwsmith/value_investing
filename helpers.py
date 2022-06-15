@@ -300,19 +300,24 @@ def growth(df_balance, df_income, df_cash):
     return growth_check, df
 
 
-def sticker_price():
+def sticker_price(df_earnings):
     
-    # Placeholders
-    bvpsGrowthRate = .15
-    analystGrowthRate = .095
-    currentEPS = 
+    # Placeholders for variables
+    bvpsGrowthRate = .18
+    analystGrowthRate = .174
+
+    # get from alphavantage earnings data
+    currentEPS = 10.29
+
+    # get from 
+    avgPE = 24.27
 
     growthRate = min(analystGrowthRate, bvpsGrowthRate)
-    print(growthRate)
-
     futureEPS = currentEPS * ((1 + growthRate)**10)
-    estPE = growthRate * 200
-    futurePE = min(avgPE, estPE)
-    futureMarket = futureEPS * ()
-    sticker = futureMarket / 4
-    safe = sticker / 2
+    defaultPE = growthRate * 200
+    # estPE = min(avgPE, defaultPE)
+    futureMarketPrice = futureEPS * min(avgPE, defaultPE)
+    stickerPrice = futureMarketPrice / 4
+    safePrice = stickerPrice / 2
+
+    return stickerPrice, safePrice
