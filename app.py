@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, usd, lookup, read_jsons, management, growth
+from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth
 
 
 # Configure application
@@ -65,7 +65,7 @@ def evaluate():
         #     lookup(sym, func)
 
         # read company json files
-        b, i, c = read_jsons(sym)
+        b, i, c = read_financial_reports(sym)
 
         # plug parsed json files into mangement and growth functions
         management_check, df_mgt = management(b, i, c)
@@ -76,12 +76,12 @@ def evaluate():
         df_growth.index.name = None
 
         if growth_check:
-            growth_message = "GOOD!"
+            growth_message = "WONDERFUL!"
         else:
             growth_message = "NOT GOOD"
 
         if management_check:
-            management_message = "GOOD!"
+            management_message = "WONDERFUL!"
         else:
             management_message = "NOT GOOD"
 
