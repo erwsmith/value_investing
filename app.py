@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, usd, lookup_balance_sheet, lookup_cash_flow, lookup_income_statement, read_jsons, management, growth
+from helpers import apology, login_required, usd, lookup, read_jsons, management, growth
 
 
 # Configure application
@@ -60,9 +60,9 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-        # if lookup_balance_sheet(sym) and lookup_cash_flow(sym) and lookup_income_statement(sym):
-        #     flash("Request succeeded.")
-        # lookup_balance_sheet(sym)
+        # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "GLOBAL_QUOTE"]
+        # for func in lookup_functions:
+        #     lookup(sym, func)
 
         # read company json files
         b, i, c = read_jsons(sym)
@@ -71,18 +71,24 @@ def evaluate():
         management_check, df_mgt = management(b, i, c)
         growth_check, df_growth = growth(b, i, c)
 
-        # TODO what does this line do?
+        # TODO what does this do?
         df_mgt.index.name = None
         df_growth.index.name = None
+
+        if growth_check:
+            growth_message = "GOOD!"
+        else:
+            growth_message = "NOT GOOD"
 
         if management_check:
             management_message = "GOOD!"
         else:
             management_message = "NOT GOOD"
 
-        return render_template('evaluated.html', sym=sym.upper(), management_message=management_message, 
-                               tables=[df_mgt.to_html(classes='data'), df_growth.to_html(classes='data')], 
-                               titles=["na", f"{sym.upper()} Management", "Growth"])
+        return render_template('evaluated.html', sym=sym.upper(), growth_message=growth_message,
+                               management_message=management_message, tables=[df_mgt.to_html(classes='data'), 
+                               df_growth.to_html(classes='data')], titles=["na",
+                               f"{sym.upper()} Management", "Growth"])
 
         # else:
         #     flash("Request failed.")
