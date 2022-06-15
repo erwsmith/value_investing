@@ -44,7 +44,7 @@ def login_required(f):
 
 def lookup(sym, func):
     """
-    Requests to alphavantage and json file creation of 5 main functions
+    Requests data from alphavantage and json file creation of 5 main functions
     lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "GLOBAL_QUOTE", "OVERVIEW"]
     """
     try:
@@ -62,10 +62,47 @@ def lookup(sym, func):
         return None
 
 
-def read_jsons(sym):
+def read_overview(sym):
+
+    # Set number formatting for all dataframes to display as X.XX
+    pd.options.display.float_format = '{:,.2f}'.format
+
+    # COMPANY OVERVIEW - read and setup dataframe
+    func = "OVERVIEW"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
+        data = f.read()
+
+    # Process data and create clean dataframe
+    overview = json.loads(data)
+    df_overview = pd.json_normalize(overview)
+    df_overview.replace("None", "0", inplace=True)
+    
+    return df_overview
+
+
+def read_quote(sym):
     """
-    Read json files and get values to be used for management and growth calculations
+    Gets most recent price (This is NOT this minute's current price)
     """
+    func = "GLOBAL_QUOTE"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
+        data = f.read()
+    
+    quote = json.loads(data)
+    quote = quote["Global Quote"]["05. price"]
+
+    return quote
+
+
+def read_financial_reports(sym):
+    """
+    Read financial report json files and get values to be used for management and growth calculations
+    Includes Balance Sheet, Income Statement, and Cash Flow Statement
+    """
+
+    # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
     # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "GLOBAL_QUOTE"]
@@ -235,9 +272,8 @@ def growth(df_balance, df_income, df_cash):
 
     # Operating Cash Flow Growth Rate.
     # operatingCashflow
-    df.insert(len(df.columns), "cashflow_growth", 100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
-
-    # df_income = df_income[["totalRevenue", "ebit", "ebitda", "incomeTaxExpense", "netIncome", "incomeBeforeTax"]]
+    df.insert(len(df.columns), "cashflow_growth", 
+              100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
     df = df[["revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
     df = df.transpose()
     df.drop([2017], axis=1, inplace=True)
@@ -250,24 +286,39 @@ def growth(df_balance, df_income, df_cash):
     return growth_check, df
 
 
-def sticker_price():
-    
-    # Placeholders for variables
-    bvpsGrowthRate = .18
+def sticker_price(df_balance, df_income, df_cash, df_overview):
+
+    # bvps growth rate - get from growth()
+    _, df_growth = growth(df_balance, df_income, df_cash)
+
+    bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
+
+    # get from where?
     analystGrowthRate = .174
 
-    # get from alphavantage earnings data
-    currentEPS = 10.29
+    # get from alphavantage OVERVIEW
+    currentEPS = df_overview.loc[0, "EPS"]
 
-    # get from 
-    avgPE = 24.27
+    # # get from 
+    # avgPE = 24.27
 
-    growthRate = min(analystGrowthRate, bvpsGrowthRate)
-    futureEPS = currentEPS * ((1 + growthRate)**10)
-    defaultPE = growthRate * 200
-    # estPE = min(avgPE, defaultPE)
-    futureMarketPrice = futureEPS * min(avgPE, defaultPE)
-    stickerPrice = futureMarketPrice / 4
-    safePrice = stickerPrice / 2
+    # growthRate = min(analystGrowthRate, bvpsGrowthRate)
+    # futureEPS = currentEPS * ((1 + growthRate)**10)
+    # defaultPE = growthRate * 200
+    # # estPE = min(avgPE, defaultPE)
+    # futureMarketPrice = futureEPS * min(avgPE, defaultPE)
+    # stickerPrice = futureMarketPrice / 4
+    # safePrice = stickerPrice / 2
 
-    return stickerPrice, safePrice
+    # return stickerPrice, safePrice
+
+    print(bvpsGrowthRate)
+    print(currentEPS)
+
+
+sym = "LRCX"
+b, i, c = read_financial_reports(sym)
+o = read_overview(sym)
+sticker_price(b, i, c, o)
+# read_overview(sym)
+# read_quote(sym)
