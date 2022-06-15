@@ -99,6 +99,25 @@ def lookup_income_statement(symbol):
     except requests.RequestException:
         return None
 
+def lookup_earnings(symbol):
+    """
+    lookup EPS history and save as .json file
+    """
+    try:
+        api_key = os.environ.get("API_KEY")
+        sym = urllib.parse.quote_plus(symbol)
+        func = "EARNINGS"
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        response = requests.get(url)
+        response.raise_for_status()
+        earnings = response.json()
+        filepath = f"json_files/earnings_{sym}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(earnings, f, ensure_ascii=False, indent=4)
+
+    except requests.RequestException:
+        return None
+
 
 def read_jsons(sym):
 
@@ -279,3 +298,21 @@ def growth(df_balance, df_income, df_cash):
     growth_check = df["pass"].all()
 
     return growth_check, df
+
+
+def sticker_price():
+    
+    # Placeholders
+    bvpsGrowthRate = .15
+    analystGrowthRate = .095
+    currentEPS = 
+
+    growthRate = min(analystGrowthRate, bvpsGrowthRate)
+    print(growthRate)
+
+    futureEPS = currentEPS * ((1 + growthRate)**10)
+    estPE = growthRate * 200
+    futurePE = min(avgPE, estPE)
+    futureMarket = futureEPS * ()
+    sticker = futureMarket / 4
+    safe = sticker / 2
