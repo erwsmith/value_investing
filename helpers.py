@@ -1,4 +1,5 @@
 import os
+from symtable import SymbolTable
 import requests
 import urllib.parse
 import pandas as pd
@@ -41,91 +42,38 @@ def login_required(f):
     return decorated_function
 
 
-def lookup_balance_sheet(symbol):
+def lookup(sym, func):
     """
-    Look up balance sheets for last 5 years for symbol and save as .json file
-    """
-    try:
-        api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus(symbol)
-        func = "BALANCE_SHEET"
-        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
-        response = requests.get(url)
-        response.raise_for_status()
-        balance_sheet = response.json()
-        filepath = f"json_files/balance_sheet_{sym}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(balance_sheet, f, ensure_ascii=False, indent=4)
-
-    except requests.RequestException:
-        return None
-
-
-def lookup_cash_flow(symbol):
-    """
-    lookup cash flow data for last 5 years and save as .json file
+    Requests to alphavantage and json file creation of 5 main functions
+    lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "GLOBAL_QUOTE", "OVERVIEW"]
     """
     try:
         api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus(symbol)
-        func = "CASH_FLOW"
+        sym = urllib.parse.quote_plus(SymbolTable)
         url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
         response = requests.get(url)
         response.raise_for_status()
-        cash_flow = response.json()
-        filepath = f"json_files/cash_flow_{sym}.json"
+        data = response.json()
+        filepath = f"json_files/{sym}_{func}.json"
         with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(cash_flow, f, ensure_ascii=False, indent=4)
-
-    except requests.RequestException:
-        return None
-
-def lookup_income_statement(symbol):
-    """
-    lookup income statement data for last 5 years and save as .json file
-    """
-    try:
-        api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus(symbol)
-        func = "INCOME_STATEMENT"
-        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
-        response = requests.get(url)
-        response.raise_for_status()
-        income_statement = response.json()
-        filepath = f"json_files/income_statement_{sym}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(income_statement, f, ensure_ascii=False, indent=4)
-
-    except requests.RequestException:
-        return None
-
-def lookup_earnings(symbol):
-    """
-    lookup EPS history and save as .json file
-    """
-    try:
-        api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus(symbol)
-        func = "EARNINGS"
-        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
-        response = requests.get(url)
-        response.raise_for_status()
-        earnings = response.json()
-        filepath = f"json_files/earnings_{sym}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(earnings, f, ensure_ascii=False, indent=4)
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
     except requests.RequestException:
         return None
 
 
 def read_jsons(sym):
-
+    """
+    Read json files and get values to be used for management and growth calculations
+    """
     pd.options.display.float_format = '{:,.2f}'.format
 
+    # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "GLOBAL_QUOTE"]
+
     # BALANCE SHEET - read and setup dataframe
-    bs_filepath = f"json_files/balance_sheet_{sym}.json"
-    with open(bs_filepath, "r+") as f:
+    func = "BALANCE_SHEET"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
         data = f.read()
 
     # Process data and create clean dataframe
@@ -153,8 +101,9 @@ def read_jsons(sym):
 
 
     # CASH FLOW STATEMENT - read and setup dataframe
-    cf_filepath = f"json_files/cash_flow_{sym}.json"
-    with open(cf_filepath, "r") as f: 
+    func = "CASH_FLOW"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r") as f: 
         data = f.read()
 
     # Process data and create clean dataframe
@@ -176,8 +125,9 @@ def read_jsons(sym):
 
 
     # INCOME STATEMENT - read and setup dataframe
-    income_filepath = f"json_files/income_statement_{sym}.json"
-    with open(income_filepath, "r") as f: 
+    func = "INCOME_STATEMENT"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r") as f: 
         data = f.read()
 
     # Process data and create clean dataframe
@@ -240,17 +190,17 @@ def management(df_balance, df_income, df_cash):
     # Check average current ratio
     current_avg = df.loc["current_ratio","5y_average"]
     df.loc[["current_ratio"],["pass"]] = current_avg > 1
-    df.loc[["current_ratio"],["target"]] = f"current ratio > 1"
+    df.loc[["current_ratio"],["target"]] = f"1 < current ratio"
 
     # Check average durability
     durability_avg = df.loc["durability","5y_average"]
-    df.loc[["durability"],["pass"]] = durability_avg < 3
-    df.loc[["durability"],["target"]] = f"durability > 1"
+    df.loc[["durability"],["pass"]] = (durability_avg < 3) & (durability_avg > 0)
+    df.loc[["durability"],["target"]] = f"0 < durability < 3"
 
     # Check average roic
     roic_avg = df.loc["roic","5y_average"]
     df.loc[["roic"],["pass"]] = roic_avg > 10
-    df.loc[["roic"],["target"]] = f"roic % > 10"
+    df.loc[["roic"],["target"]] = f"10 < roic %"
 
     # Mangement quality check
     management_check = df["pass"].all()
@@ -300,7 +250,7 @@ def growth(df_balance, df_income, df_cash):
     return growth_check, df
 
 
-def sticker_price(df_earnings):
+def sticker_price():
     
     # Placeholders for variables
     bvpsGrowthRate = .18
