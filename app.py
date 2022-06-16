@@ -5,7 +5,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth
+from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth, iex_get_quote
 
 
 # Configure application
@@ -60,7 +60,14 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-        # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "GLOBAL_QUOTE"]
+    if iex_get_quote(request.form.get("symbol")):
+        stock_quote = iex_get_quote(request.form.get("symbol"))
+        name = stock_quote["name"]
+        price = usd(stock_quote["price"])
+    else:
+        flash("Request failed. Is symbol valid?")        
+
+        # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
         # for func in lookup_functions:
         #     lookup(sym, func)
 
@@ -85,15 +92,10 @@ def evaluate():
         else:
             management_message = "NOT GOOD"
 
-        return render_template('evaluated.html', sym=sym.upper(), growth_message=growth_message,
+        return render_template('evaluated.html', name=name, price=price, sym=sym.upper(), growth_message=growth_message,
                                management_message=management_message, tables=[df_mgt.to_html(classes='data'), 
                                df_growth.to_html(classes='data')], titles=["na",
                                f"{sym.upper()} Management", "Growth"])
-
-        # else:
-        #     flash("Request failed.")
-        #     return render_template("evaluate.html")
-            # return apology("Failed request", 400)
 
 
 @app.route("/login", methods=["GET", "POST"])
