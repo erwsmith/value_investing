@@ -55,23 +55,24 @@ def evaluate():
     if request.method == "POST":
         sym = request.form.get("symbol")
 
-    if iex_get_quote(request.form.get("symbol")):
-        stock_quote = iex_get_quote(request.form.get("symbol"))
-        name = stock_quote["name"]
-        price = usd(stock_quote["price"])
-    else:
-        flash("Request failed. Is symbol valid?")        
+        if iex_get_quote(request.form.get("symbol")):
+            stock_quote = iex_get_quote(request.form.get("symbol"))
+            name = stock_quote["name"]
+            price = usd(stock_quote["price"])
+        else:
+            flash("Request failed. Is symbol valid?")        
 
+        # TODO USE THE FOLLOWING TO BYPASS JSON FILE CREATION, GO STRAIGHT TO READING DATA
         # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
         # for func in lookup_functions:
         #     lookup(sym, func)
 
-        # read company json files
-        b, i, c = read_financial_reports(sym)
+        # get financial reports dataframe
+        df = read_financial_reports(sym)
 
         # plug parsed json files into mangement and growth functions
-        management_check, df_mgt = management(b, i, c)
-        growth_check, df_growth = growth(b, i, c)
+        management_check, df_mgt = management(df)
+        growth_check, df_growth = growth(df)
 
         # TODO what does this do?
         df_mgt.index.name = None
@@ -80,17 +81,18 @@ def evaluate():
         if growth_check:
             growth_message = "WONDERFUL!"
         else:
-            growth_message = "NOT GOOD"
+            growth_message = "NOT WONDERFUL"
 
         if management_check:
             management_message = "WONDERFUL!"
         else:
-            management_message = "NOT GOOD"
+            management_message = "NOT WONDERFUL"
 
-        return render_template('evaluated.html', name=name, price=price, sym=sym.upper(), growth_message=growth_message,
-                               management_message=management_message, tables=[df_mgt.to_html(classes='data'), 
+        return render_template('evaluated.html', name=name, price=price, sym=sym.upper(), 
+                               growth_message=growth_message, management_message=management_message, 
+                               tables=[df_mgt.to_html(classes='data'), 
                                df_growth.to_html(classes='data')], titles=["na",
-                               f"{sym.upper()} Management", "Growth"])
+                               f"{sym.upper()} Management", f"{sym.upper()} Growth"])
 
 
 @app.route("/login", methods=["GET", "POST"])
