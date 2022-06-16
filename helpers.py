@@ -310,7 +310,7 @@ def sticker_price(df_financials, df_overview):
     currentEPS = float(df_overview.loc[0, "EPS"])
 
     # get from ?
-    # avgPE = 24.27
+    avgPE = 24.27
 
     # growthRate = min(analystGrowthRate, bvpsGrowthRate)
     # futureEPS = currentEPS * ((1 + growthRate)**10)
