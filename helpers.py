@@ -314,9 +314,8 @@ def sticker_price(df_financials, df_overview):
     Calculate company "sticker price" or the estimated actual value
     """
 
-    # bvps growth rate - get from growth()
+    # get bvps growth rate from growth()
     _, df_growth = growth(df_financials)
-
     bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
 
     # get from where?
@@ -340,7 +339,10 @@ def sticker_price(df_financials, df_overview):
     return bvpsGrowthRate, currentEPS
 
 
-sym = "LRCX"
+
+# FUNCTION TESTING
+
+# sym = "LRCX"
 
 # df = read_financial_reports(sym)
 
