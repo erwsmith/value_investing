@@ -187,15 +187,19 @@ def read_financial_reports(sym):
     # nopat = ebit * (1 - effective_tax_rate)
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
 
-    return df_balance, df_income, df_cash
-
-
-def management(df_balance, df_income, df_cash):
-
     # COMBINE DATAFRAMES
-    df = df_balance[["de_ratio", "current_ratio", "longTermDebt", 
-                     "investedCapital", "commonStockSharesOutstanding"]].join(df_cash[["freeCashFlow", 
-                     "nonOperatingCash"]]).join(df_income[["nopat"]])
+    df_financials = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital", "commonStockSharesOutstanding", "totalShareholderEquity"]].join(df_cash[["freeCashFlow", "nonOperatingCash", "operatingCashflow"]]).join(df_income[["nopat", "totalRevenue", "netIncome"]])
+
+    return df_financials
+
+
+def management(df_financials):
+    """
+    Calculate values to check company management quality
+    """
+
+    # rename df for convenience
+    df = df_financials
 
     # Calculate durability
     df["durability"] = df["longTermDebt"] / df["freeCashFlow"]
@@ -245,11 +249,13 @@ def management(df_balance, df_income, df_cash):
     return management_check, df
 
 
-def growth(df_balance, df_income, df_cash):
+def growth(df_financials):
+    """
+    Calculate values to check company growth history
+    """
 
-    # total revenue (Sales) growth rate
-    df = df_income[["totalRevenue", "netIncome"]].join(df_balance[["commonStockSharesOutstanding", "totalShareholderEquity"]]).join(df_cash[["operatingCashflow"]])
-    df.sort_index(inplace=True)
+    df = df_financials[["totalRevenue", "netIncome", "commonStockSharesOutstanding", "totalShareholderEquity", "operatingCashflow"]]
+    df = df.sort_index()
 
     # NOTE regarding pandas built-in percent change calculation: 
     # if the 2 values being compared are negative, and the new value is lower than the old, the output of pct_change() will be positive, which is VERY erroneous
@@ -257,6 +263,7 @@ def growth(df_balance, df_income, df_cash):
     # df.insert(len(df.columns), "revenue_growth_bad", 100 * df["totalRevenue"].pct_change())
 
     # Better way of calculating percent change:
+    # total revenue (Sales) growth rate
     df.insert(len(df.columns), "revenue_growth", 100 * (df["totalRevenue"] - df["totalRevenue"].shift()) / abs(df["totalRevenue"].shift()))
 
     # Earnings Per Share Growth Rate.
@@ -286,10 +293,13 @@ def growth(df_balance, df_income, df_cash):
     return growth_check, df
 
 
-def sticker_price(df_balance, df_income, df_cash, df_overview):
+def sticker_price(df_financials, df_overview):
+    """
+    Calculate company "sticker price" or the estimated actual value
+    """
 
     # bvps growth rate - get from growth()
-    _, df_growth = growth(df_balance, df_income, df_cash)
+    _, df_growth = growth(df_financials)
 
     bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
 
@@ -297,28 +307,36 @@ def sticker_price(df_balance, df_income, df_cash, df_overview):
     analystGrowthRate = .174
 
     # get from alphavantage OVERVIEW
-    currentEPS = df_overview.loc[0, "EPS"]
+    currentEPS = float(df_overview.loc[0, "EPS"])
 
-    # # get from 
+    # get from ?
     # avgPE = 24.27
 
     # growthRate = min(analystGrowthRate, bvpsGrowthRate)
     # futureEPS = currentEPS * ((1 + growthRate)**10)
     # defaultPE = growthRate * 200
-    # # estPE = min(avgPE, defaultPE)
     # futureMarketPrice = futureEPS * min(avgPE, defaultPE)
     # stickerPrice = futureMarketPrice / 4
     # safePrice = stickerPrice / 2
 
     # return stickerPrice, safePrice
 
-    print(bvpsGrowthRate)
-    print(currentEPS)
+    return bvpsGrowthRate, currentEPS
 
 
-sym = "LRCX"
-b, i, c = read_financial_reports(sym)
-o = read_overview(sym)
-sticker_price(b, i, c, o)
-# read_overview(sym)
-# read_quote(sym)
+# sym = "LRCX"
+# df = read_financial_reports(sym)
+
+# print(df)
+
+# print(management(df))
+
+# _, d = growth(df)
+# print(d)
+
+# o = read_overview(sym)
+# print(o)
+
+# print(sticker_price(df, o))
+
+# print(read_quote(sym))
