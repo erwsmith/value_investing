@@ -25,11 +25,6 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-# get API_KEY from local .cfg file
-config = ConfigParser()
-config.read('/Users/Eric/config/keys_config.cfg')
-API_KEY = config.get('alphavantage', 'API_KEY')
-
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
