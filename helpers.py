@@ -5,6 +5,7 @@ import urllib.parse
 import pandas as pd
 import json
 
+from configparser import ConfigParser
 from flask import redirect, render_template, request, session
 from functools import wraps
 
@@ -45,15 +46,19 @@ def login_required(f):
 def lookup(sym, func):
     """
     Requests data from alphavantage and json file creation of 5 main functions
-    lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "GLOBAL_QUOTE", "OVERVIEW"]
+    lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
     """
     try:
-        api_key = os.environ.get("API_KEY")
-        sym = urllib.parse.quote_plus(SymbolTable)
-        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={api_key}"
+        # get API_KEY from local .cfg file
+        config = ConfigParser()
+        config.read('config/keys_config.cfg')
+        API_KEY = config.get('alphavantage', 'API_KEY')
+        # api_key = os.environ.get("API_KEY")
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={API_KEY}"
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
+        # return data
         filepath = f"json_files/{sym}_{func}.json"
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -81,19 +86,30 @@ def read_overview(sym):
     return df_overview
 
 
-def read_quote(sym):
-    """
-    Gets most recent price (This is NOT this minute's current price)
-    """
-    func = "GLOBAL_QUOTE"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
-    
-    quote = json.loads(data)
-    quote = quote["Global Quote"]["05. price"]
+def iex_get_quote(sym):
+    """Look up quote for symbol."""
 
-    return quote
+    # Contact iex API
+    try:
+        config = ConfigParser()
+        config.read('config/keys_config.cfg')
+        API_KEY = config.get('iex', 'publishable_token')
+        url = f"https://cloud.iexapis.com/stable/stock/{urllib.parse.quote_plus(sym)}/quote?token={API_KEY}"
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+
+    # Parse response
+    try:
+        quote = response.json()
+        return {
+            "name": quote["companyName"],
+            "price": float(quote["latestPrice"]),
+            "symbol": quote["symbol"]
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def read_financial_reports(sym):
@@ -105,7 +121,7 @@ def read_financial_reports(sym):
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
-    # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "GLOBAL_QUOTE"]
+    # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
 
     # BALANCE SHEET - read and setup dataframe
     func = "BALANCE_SHEET"
@@ -324,7 +340,8 @@ def sticker_price(df_financials, df_overview):
     return bvpsGrowthRate, currentEPS
 
 
-# sym = "LRCX"
+sym = "LRCX"
+
 # df = read_financial_reports(sym)
 
 # print(df)
@@ -340,3 +357,11 @@ def sticker_price(df_financials, df_overview):
 # print(sticker_price(df, o))
 
 # print(read_quote(sym))
+
+# print(iex_get_quote(sym))
+
+# sym = "UFI"
+# lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
+# for func in lookup_functions:
+#     lookup(sym, func)
+
