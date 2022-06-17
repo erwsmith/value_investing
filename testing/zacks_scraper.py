@@ -6,8 +6,8 @@ import urllib.parse
 import bs4
 
 def scrape_zacks():
-    # url = f"https://www.zacks.com/stock/quote/{sym}/detailed-earning-estimates"
-    url = "https://books.toscrape.com/"    
+    url = f"https://www.zacks.com/stock/quote/{sym}/detailed-earning-estimates"
+    # url = "https://books.toscrape.com/"    
     response = requests.get(url)
     data = response.json()
     print(data)
