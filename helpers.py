@@ -368,10 +368,19 @@ def sticker_price(df_financials, df_overview):
     # get from where?
     analystGrowthRate = .174
 
+    # set projected growth rate, cap at 15%
     growthRate = min(analystGrowthRate, bvpsGrowthRate)
+    if growthRate > .15:
+        growthRate = .15
+
+    # calculate estimated EPS 10 years from now  
     futureEPS = currentEPS * ((1 + growthRate)**10)
+    
+    # calculate estimated price in 10 years
     defaultPE = growthRate * 200
     futureMarketPrice = futureEPS * min(avgPE, defaultPE)
+
+    # apply Minimum Acceptable Rate of Return of 15%
     stickerPrice = futureMarketPrice / 4
     safePrice = stickerPrice / 2
 
