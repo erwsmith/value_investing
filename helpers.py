@@ -43,49 +43,6 @@ def login_required(f):
     return decorated_function
 
 
-def lookup(sym, func):
-    """
-    Requests data from alphavantage and json file creation of 5 main functions
-    lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
-    """
-    try:
-        # get API_KEY from local .cfg file
-        config = ConfigParser()
-        config.read('config/keys_config.cfg')
-        API_KEY = config.get('alphavantage', 'API_KEY')
-        # api_key = os.environ.get("API_KEY")
-        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={API_KEY}"
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        # return data
-        filepath = f"json_files/{sym}_{func}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-    except requests.RequestException:
-        return None
-
-
-def read_overview(sym):
-
-    # Set number formatting for all dataframes to display as X.XX
-    pd.options.display.float_format = '{:,.2f}'.format
-
-    # COMPANY OVERVIEW - read and setup dataframe
-    func = "OVERVIEW"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
-
-    # Process data and create clean dataframe
-    overview = json.loads(data)
-    df_overview = pd.json_normalize(overview)
-    df_overview.replace("None", "0", inplace=True)
-    
-    return df_overview
-
-
 def iex_get_quote(sym):
     """Look up quote for symbol."""
 
@@ -109,6 +66,32 @@ def iex_get_quote(sym):
             "symbol": quote["symbol"]
         }
     except (KeyError, TypeError, ValueError):
+        return None
+
+
+def lookup(sym, func):
+    """
+    Requests data from alphavantage and json file creation of 5 main functions
+    lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
+    """
+    try:
+        # get API_KEY from local .cfg file
+        config = ConfigParser()
+        config.read('config/keys_config.cfg')
+        API_KEY = config.get('alphavantage', 'API_KEY')
+        url = f"https://www.alphavantage.co/query?function={func}&symbol={sym}&apikey={API_KEY}"
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        
+        # return data
+
+        # create json files for the response data
+        filepath = f"json_files/{sym}_{func}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    except requests.RequestException:
         return None
 
 
@@ -209,6 +192,25 @@ def read_financial_reports(sym):
     return df_financials
 
 
+def read_overview(sym):
+
+    # Set number formatting for all dataframes to display as X.XX
+    pd.options.display.float_format = '{:,.2f}'.format
+
+    # COMPANY OVERVIEW - read and setup dataframe
+    func = "OVERVIEW"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
+        data = f.read()
+
+    # Process data and create clean dataframe
+    overview = json.loads(data)
+    df_overview = pd.json_normalize(overview)
+    df_overview.replace("None", "0", inplace=True)
+    
+    return df_overview
+
+
 def management(df_financials):
     """
     Calculate values to check company management quality
@@ -297,9 +299,9 @@ def growth(df_financials):
     # operatingCashflow
     df.insert(len(df.columns), "cashflow_growth", 
               100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
-    df = df[["revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
+    df = df[["eps", "revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
     df = df.transpose()
-    df.drop([2017], axis=1, inplace=True)
+    # df.drop([2017], axis=1, inplace=True)
     df["avg_growth"] = df.mean(axis=1)
     df["pass"] = df["avg_growth"] > 10
 
@@ -309,42 +311,78 @@ def growth(df_financials):
     return growth_check, df
 
 
+def read_time_series_monthly(sym):
+    # Set number formatting for all dataframes to display as X.XX
+    pd.options.display.float_format = '{:,.2f}'.format
+
+    # Historical Price data: TIME_SERIES_MONTHLY_ADJUSTED - read and setup dataframe
+    func = "TIME_SERIES_MONTHLY_ADJUSTED"
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
+        data = f.read()
+
+    # Process data and create list of annual historical prices in JUNE, same month as financial report data
+    price_history = json.loads(data)
+    price_history_list = []
+    dates = ["2022-06-16", "2021-06-30", "2020-06-30", "2019-06-28", "2018-06-29", "2017-06-30"]
+    for date in dates:
+        price_history_list.append(price_history["Monthly Adjusted Time Series"][date]["5. adjusted close"])
+    
+    # create and format dataframe of historical pricing
+    d = {'date': dates, 'price': price_history_list}
+    df_price = pd.DataFrame(d)
+    df_price["date"] = pd.to_datetime(df_price["date"])
+    df_price['year'] = pd.DatetimeIndex(df_price['date']).year
+    df_price.set_index("year", inplace=True)
+    df_price.drop(['date'], axis=1, inplace=True)
+    df_price = df_price.sort_index()
+
+    return df_price
+
+
 def sticker_price(df_financials, df_overview):
     """
-    Calculate company "sticker price" or the estimated actual value
+    Calculate company "Sticker Price" or the estimated actual value, and the "Margin of Safety Price" to compare to current price
     """
+
+    # Set number formatting for all dataframes to display as X.XX    
+    pd.options.display.float_format = '{:,.2f}'.format
 
     # get bvps growth rate from growth()
     _, df_growth = growth(df_financials)
     bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
 
-    # get from where?
-    analystGrowthRate = .174
-
     # get from alphavantage OVERVIEW
     currentEPS = float(df_overview.loc[0, "EPS"])
 
-    # get from ?
-    avgPE = 24.27
+    # calculate average PE ratio (EPS/price)
+    df_pe = pd.DataFrame(df_growth.drop(["avg_growth", "pass"], axis=1).transpose()["eps"])
+    sym = df_overview.loc[0, "Symbol"]
+    price = read_time_series_monthly(sym)
+    df_pe = price.join(df_pe)
+    df_pe.loc[[2022],["eps"]] = currentEPS
+    df_pe = df_pe.astype('float')
+    df_pe["pe"] = df_pe["price"] / df_pe["eps"]
+    avgPE = df_pe["pe"].mean()
 
-    # growthRate = min(analystGrowthRate, bvpsGrowthRate)
-    # futureEPS = currentEPS * ((1 + growthRate)**10)
-    # defaultPE = growthRate * 200
-    # futureMarketPrice = futureEPS * min(avgPE, defaultPE)
-    # stickerPrice = futureMarketPrice / 4
-    # safePrice = stickerPrice / 2
+    # get from where?
+    analystGrowthRate = .174
 
-    # return stickerPrice, safePrice
+    growthRate = min(analystGrowthRate, bvpsGrowthRate)
+    futureEPS = currentEPS * ((1 + growthRate)**10)
+    defaultPE = growthRate * 200
+    futureMarketPrice = futureEPS * min(avgPE, defaultPE)
+    stickerPrice = futureMarketPrice / 4
+    safePrice = stickerPrice / 2
 
-    return bvpsGrowthRate, currentEPS
-
+    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
 
 
 # FUNCTION TESTING
 
-# sym = "LRCX"
+sym = "LRCX"
 
-# df = read_financial_reports(sym)
+df = read_financial_reports(sym)
 
 # print(df)
 
@@ -353,10 +391,10 @@ def sticker_price(df_financials, df_overview):
 # _, d = growth(df)
 # print(d)
 
-# o = read_overview(sym)
+o = read_overview(sym)
 # print(o)
 
-# print(sticker_price(df, o))
+print(sticker_price(df, o))
 
 # print(read_quote(sym))
 
@@ -367,3 +405,6 @@ def sticker_price(df_financials, df_overview):
 # for func in lookup_functions:
 #     lookup(sym, func)
 
+# lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
+
+# print(read_time_series_monthly("LRCX"))
