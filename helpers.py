@@ -1,13 +1,18 @@
 import os
-from symtable import SymbolTable
 import requests
 import urllib.parse
 import pandas as pd
 import json
 
+from symtable import SymbolTable
 from configparser import ConfigParser
 from flask import redirect, render_template, request, session
 from functools import wraps
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
+
 
 def usd(value):
     """Format value as USD."""
@@ -19,7 +24,6 @@ def apology(message, code=400):
     def escape(s):
         """
         Escape special characters.
-
         https://github.com/jacebrowning/memegen#special-characters
         """
         for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
@@ -32,7 +36,6 @@ def apology(message, code=400):
 def login_required(f):
     """
     Decorate routes to require login.
-
     https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
     """
     @wraps(f)
@@ -340,6 +343,29 @@ def read_time_series_monthly(sym):
     return df_price
 
 
+def yahoo_growth(sym):
+    """Use selenium to obtain analyst growth rate from yahoo finance"""
+    
+    # filepath to chromedriver
+    path = "/usr/local/bin"
+    
+    # driver setup
+    options = Options()
+    options.headless = True
+    options.add_argument("--window-size=192,120")
+    driver = webdriver.Chrome(options=options)
+    
+    # get table element using full xpath
+    url = f"https://finance.yahoo.com/quote/{sym}/analysis?p={sym}"
+    driver.get(url)
+    full_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div/section/table[6]/tbody/tr[5]/td[2]"
+    element = driver.find_element(by=By.XPATH, value=full_xpath)
+    analystGrowthRate = float(element.text.replace("%", ""))
+    driver.close()
+
+    return analystGrowthRate
+
+
 def sticker_price(df_financials, df_overview):
     """
     Calculate company "Sticker Price" or the estimated actual value, and the "Margin of Safety Price" to compare to current price
@@ -365,8 +391,8 @@ def sticker_price(df_financials, df_overview):
     df_pe["pe"] = df_pe["price"] / df_pe["eps"]
     avgPE = df_pe["pe"].mean()
 
-    # get from where?
-    analystGrowthRate = .174
+    # get analyst growth rate from yahoo finance
+    analystGrowthRate = yahoo_growth(sym)
 
     # set projected growth rate, cap at 15%
     growthRate = min(analystGrowthRate, bvpsGrowthRate)
@@ -384,7 +410,8 @@ def sticker_price(df_financials, df_overview):
     stickerPrice = futureMarketPrice / 4
     safePrice = stickerPrice / 2
 
-    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
+    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}"), analystGrowthRate
+
 
 
 # FUNCTION TESTING
