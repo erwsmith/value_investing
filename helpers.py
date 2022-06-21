@@ -416,9 +416,9 @@ def sticker_price(df_financials, df_overview):
 
 # FUNCTION TESTING
 
-sym = "LRCX"
+# sym = "MSFT"
 
-df = read_financial_reports(sym)
+# df = read_financial_reports(sym)
 
 # print(df)
 
@@ -427,10 +427,10 @@ df = read_financial_reports(sym)
 # _, d = growth(df)
 # print(d)
 
-o = read_overview(sym)
+# o = read_overview(sym)
 # print(o)
 
-print(sticker_price(df, o))
+# print(sticker_price(df, o))
 
 # print(read_quote(sym))
 
