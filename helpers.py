@@ -392,13 +392,17 @@ def sticker_price(df_financials, df_overview):
     avgPE = df_pe["pe"].mean()
 
     # get analyst growth rate from yahoo finance
-    analystGrowthRate = yahoo_growth(sym)
+    try:
+        analystGrowthRate = yahoo_growth(sym)
+        
+        # set projected growth rate, cap at 15%
+        growthRate = min(analystGrowthRate, bvpsGrowthRate)
+        if growthRate > .15:
+            growthRate = .15
 
-    # set projected growth rate, cap at 15%
-    growthRate = min(analystGrowthRate, bvpsGrowthRate)
-    if growthRate > .15:
-        growthRate = .15
-
+    except:
+        growthRate = bvpsGrowthRate
+    
     # calculate estimated EPS 10 years from now  
     futureEPS = currentEPS * ((1 + growthRate)**10)
     
@@ -410,7 +414,7 @@ def sticker_price(df_financials, df_overview):
     stickerPrice = futureMarketPrice / 4
     safePrice = stickerPrice / 2
 
-    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}"), analystGrowthRate
+    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
 
 
 
