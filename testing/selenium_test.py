@@ -9,7 +9,7 @@ path = "/usr/local/bin"
 options = Options()
 options.headless = True
 options.add_argument("--window-size=192,120")
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chßrome(options=options)
 
 # yahoo finance
 sym = "LRCX"
@@ -17,10 +17,8 @@ url = f"https://finance.yahoo.com/quote/LRCX/analysis?p={sym}"
 driver.get(url)
 full_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div/section/table[6]/tbody/tr[5]/td[2]"
 element = driver.find_element(by=By.XPATH, value=full_xpath)
-time.sleep(1)
 print(element.text)
 driver.close()
-
 
 # google search working example
 # driver.get("https://www.google.com")
