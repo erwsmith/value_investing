@@ -8,13 +8,18 @@
 
     <div>{{ name }} ({{ sym }})</div>
     <div>Current price: {{ price }}</div>
+    <div>Sticker Price: {{ stickerPrice }}</div>
+    <div>Safe Price: {{ safePrice }}</div>
+    <div>Management rating: {{ management_message }}</div>
+    <div>Growth rating: {{ growth_message }}</div>
+    <div>Undervalued? {{ undervalued }} </div>
+    <div>Fully Discounted? {{ fullyDiscounted }}</div>
+
     <hr>
+
     {% for table in tables %}
             <h2>{{ titles[loop.index] }}</h2>
             {{ table|safe }}
     {% endfor %}
-    
-    <div>{{ sym }} management rating: {{ management_message }}</div>
-    <div>{{ sym }} growth rating: {{ growth_message }}</div>
- 
+
 {% endblock %}
