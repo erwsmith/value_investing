@@ -5,7 +5,8 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
-from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth, iex_get_quote
+from helpers import *
+# from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth, iex_get_quote, sticker_price, read_overview
 
 
 # Configure application
@@ -58,7 +59,7 @@ def evaluate():
         if iex_get_quote(request.form.get("symbol")):
             stock_quote = iex_get_quote(request.form.get("symbol"))
             name = stock_quote["name"]
-            price = usd(stock_quote["price"])
+            price = float(stock_quote["price"])
         else:
             flash("Request failed. Is symbol valid?")        
 
@@ -70,9 +71,22 @@ def evaluate():
         # get financial reports dataframe
         df = read_financial_reports(sym)
 
-        # plug parsed json files into mangement and growth functions
+        # plug parsed json files into helper functions
         management_check, df_mgt = management(df)
         growth_check, df_growth = growth(df)
+        df_overview = read_overview(sym)
+        stickerPrice, safePrice = sticker_price(df, df_overview)
+
+        discount = 1 - (price / stickerPrice)
+        if stickerPrice > 0 and discount > 0:
+            undervalued = True
+        else:
+            undervalued = False
+
+        if price < safePrice:
+            fullyDiscounted = True
+        else:
+            fullyDiscounted = False
 
         # TODO what does this do?
         df_mgt.index.name = None
@@ -81,18 +95,20 @@ def evaluate():
         if growth_check:
             growth_message = "WONDERFUL!"
         else:
-            growth_message = "NOT WONDERFUL"
+            growth_message = "not wonderful"
 
         if management_check:
             management_message = "WONDERFUL!"
         else:
-            management_message = "NOT WONDERFUL"
+            management_message = "not wonderful"
 
-        return render_template('evaluated.html', name=name, price=price, sym=sym.upper(), 
+        return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
                                growth_message=growth_message, management_message=management_message, 
                                tables=[df_mgt.to_html(classes='data'), 
                                df_growth.to_html(classes='data')], titles=["na",
-                               f"{sym.upper()} Management", f"{sym.upper()} Growth"])
+                               f"{sym.upper()} Management", f"{sym.upper()} Growth"], 
+                               stickerPrice=usd(stickerPrice), safePrice=usd(safePrice), 
+                               undervalued=undervalued, fullyDiscounted=fullyDiscounted)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -141,26 +157,6 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
-
-
-# @app.route("/quote", methods=["GET", "POST"])
-# @login_required
-# def quote():
-#     """Get stock quote."""
-
-#     if request.method == "GET":
-#         return render_template("quote.html")
-
-#     if request.method == "POST":
-#         if lookup(request.form.get("symbol")):
-#             stock_quote = lookup(request.form.get("symbol"))
-#             name = stock_quote["name"]
-#             price = usd(stock_quote["price"])
-#             symbol = stock_quote["symbol"]
-#             return render_template("quoted.html", name=name, price=price, symbol=symbol)
-#         else:
-#             # flash("Enter a valid symbol.")
-#             return apology("Not a valid symbol", 400)
 
 
 @app.route("/register", methods=["GET", "POST"])
