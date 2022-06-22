@@ -323,18 +323,24 @@ def read_time_series_monthly(sym):
 
     # Process data and create list of annual historical prices in JUNE, same month as financial report data
     price_history = json.loads(data)
-    price_history_list = []
-    dates = ["2022-06-16", "2021-06-30", "2020-06-30", "2019-06-28", "2018-06-29", "2017-06-30"]
-    for date in dates:
-        price_history_list.append(price_history["Monthly Adjusted Time Series"][date]["5. adjusted close"])
-    
-    # create and format dataframe of historical pricing
-    d = {'date': dates, 'price': price_history_list}
-    df_price = pd.DataFrame(d)
+    price_history_dict = {}
+    dates = []
+    i = 0
+
+    for i, date in enumerate(price_history["Monthly Adjusted Time Series"]):
+        if i == 0 or i % 12 == 0:
+            price_history_dict[date] = price_history["Monthly Adjusted Time Series"][date]["5. adjusted close"]
+            i += 1
+            dates.append(date)
+        elif len(dates) == 6:
+            break
+
+    df_price = pd.DataFrame.from_dict(price_history_dict, orient="index", columns=["price"])
+    df_price["date"] = df_price.index
     df_price["date"] = pd.to_datetime(df_price["date"])
-    df_price['year'] = pd.DatetimeIndex(df_price['date']).year
+    df_price["year"] = pd.DatetimeIndex(df_price["date"]).year
     df_price.set_index("year", inplace=True)
-    df_price.drop(['date'], axis=1, inplace=True)
+    df_price.drop(["date"], axis=1, inplace=True)
     df_price = df_price.sort_index()
 
     return df_price
@@ -443,4 +449,4 @@ def sticker_price(df_financials, df_overview):
 
 # lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
 
-print(read_time_series_monthly("LRCX"))
+# print(read_time_series_monthly("ALK"))
