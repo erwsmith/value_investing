@@ -342,9 +342,6 @@ def read_time_series_monthly(sym):
 def yahoo_growth(sym):
     """Use selenium to obtain analyst growth rate from yahoo finance"""
     
-    # filepath to chromedriver
-    path = "/usr/local/bin"
-    
     # driver setup
     options = Options()
     options.headless = True
@@ -358,6 +355,8 @@ def yahoo_growth(sym):
     element = driver.find_element(by=By.XPATH, value=full_xpath)
     analystGrowthRate = float(element.text.replace("%", ""))
     driver.close()
+    
+    # analystGrowthRate = .1
 
     return analystGrowthRate
 
