@@ -25,7 +25,10 @@ nav .navbar-brand .green
 h1 {
     text-align: justify;
     max-width: 750px;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    padding: 10px;
 }
 
 h3 {
@@ -60,9 +63,23 @@ table.dataframe, .dataframe th, .dataframe td {
     border-collapse: collapse;
     text-align:left;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 50px;
     margin-left: auto;
     margin-right: auto;
     font-size: 1em;
   }
 
+.table {
+    margin: auto;
+    width: 30% !important;
+    margin-bottom: 50px;
+}
+
+div#loading {
+    margin: auto;
+    width: 800px;
+    height: 600px;
+    display: none;
+    background: url(loading.gif) no-repeat;
+    cursor: wait;
+}
