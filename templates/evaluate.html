@@ -5,12 +5,14 @@
 {% endblock %}
 
 {% block main %}
-
-<form action="/evaluate" method="post">
-    <div class="mb-3">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text" required>
-    </div>
-    <button class="btn btn-primary" type="submit">Evaluate</button>
-</form>
+<div id="loading"></div>
+<div id="content">
+    <form action="/evaluate" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text" required>
+        </div>
+        <button class="btn btn-primary" type="submit" onclick="loading()">Evaluate</button>
+    </form>
+</div>
 
 {% endblock %}

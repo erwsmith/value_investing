@@ -6,20 +6,50 @@
 
 {% block main %}
 
-    <div>{{ name }} ({{ sym }})</div>
-    <div>Current price: {{ price }}</div>
-    <div>Sticker Price: {{ stickerPrice }}</div>
-    <div>Safe Price: {{ safePrice }}</div>
-    <div>Management rating: {{ management_message }}</div>
-    <div>Growth rating: {{ growth_message }}</div>
-    <div>Undervalued? {{ undervalued }} </div>
-    <div>Fully Discounted? {{ fullyDiscounted }}</div>
+    <h1 class="text-center">{{ name }} ({{ sym }})</h1>
 
-    <hr>
+    <div class="row justify-content-center"></div>
+        <div class="col-auto"></div>
+            <table class="table table-responsive">
+                <tr>
+                    <td class="text-start">Current price</td>
+                    <td class="text-end">{{ price }}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Sticker Price</td>
+                    <td class="text-end"> {{ stickerPrice }}
+                        <!-- <button type="button" class="btn btn-primary">Calculate</button> -->
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-start">Safe Price</td>
+                    <td class="text-end">{{ safePrice }}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Management rating</td>
+                    <td class="text-end">{{ management_message }}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Growth rating</td>
+                    <td class="text-end">{{ growth_message }}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Undervalued</td>
+                    <td class="text-end">{{ undervalued }}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Fully Discounted</td>
+                    <td class="text-end">{{ fullyDiscounted }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
     {% for table in tables %}
-            <h2>{{ titles[loop.index] }}</h2>
-            {{ table|safe }}
+        <h2>{{ titles[loop.index] }}</h2>
+        {{ table|safe }}
     {% endfor %}
+
+
 
 {% endblock %}
