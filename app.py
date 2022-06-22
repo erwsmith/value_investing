@@ -109,11 +109,10 @@ def evaluate():
 
         return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
                                growth_message=growth_message, management_message=management_message, 
-                               tables=[df_mgt.to_html(classes='data'), 
-                               df_growth.to_html(classes='data')], titles=["na",
-                               f"{sym.upper()} Management", f"{sym.upper()} Growth"], 
-                               stickerPrice=usd(stickerPrice), safePrice=usd(safePrice), 
-                               undervalued=undervalued, fullyDiscounted=fullyDiscounted)
+                               tables=[df_mgt.to_html(classes='data'), df_growth.to_html(classes='data')], 
+                               titles=["na", "Management", "Growth"], stickerPrice=usd(stickerPrice), 
+                               safePrice=usd(safePrice), undervalued=undervalued, 
+                               fullyDiscounted=fullyDiscounted)
 
 
 @app.route("/login", methods=["GET", "POST"])
