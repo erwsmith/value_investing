@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import urllib.parse
 import pandas as pd
@@ -90,7 +91,7 @@ def lookup(sym, func):
         # return data
 
         # create json files for the response data
-        filepath = f"json_files/{sym}_{func}.json"
+        filepath = f"json_files/{sym.upper()}_{func}.json"
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -442,4 +443,4 @@ def sticker_price(df_financials, df_overview):
 
 # lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
 
-# print(read_time_series_monthly("LRCX"))
+print(read_time_series_monthly("LRCX"))
