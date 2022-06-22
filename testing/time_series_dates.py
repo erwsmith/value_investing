@@ -21,12 +21,12 @@ for i, date in enumerate(price_history["Monthly Adjusted Time Series"]):
     elif len(dates) == 6:
         break
 
-df = pd.DataFrame.from_dict(price_history_dict, orient="index", columns=["price"])
-df["date"] = df.index
-df["date"] = pd.to_datetime(df["date"])
-df["year"] = pd.DatetimeIndex(df["date"]).year
-df.set_index("year", inplace=True)
-df.drop(["date"], axis=1, inplace=True)
-df = df.sort_index()
+df_price = pd.DataFrame.from_dict(price_history_dict, orient="index", columns=["price"])
+df_price["date"] = df_price.index
+df_price["date"] = pd.to_datetime(df_price["date"])
+df_price["year"] = pd.DatetimeIndex(df_price["date"]).year
+df_price.set_index("year", inplace=True)
+df_price.drop(["date"], axis=1, inplace=True)
+df_price = df_price.sort_index()
 
-print(df)
+print(df_price)
