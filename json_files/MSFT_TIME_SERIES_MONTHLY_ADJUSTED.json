@@ -1,18 +1,18 @@
 {
     "Meta Data": {
         "1. Information": "Monthly Adjusted Prices and Volumes",
-        "2. Symbol": "MSFT",
-        "3. Last Refreshed": "2022-06-16",
+        "2. Symbol": "msft",
+        "3. Last Refreshed": "2022-06-22 16:00:01",
         "4. Time Zone": "US/Eastern"
     },
     "Monthly Adjusted Time Series": {
-        "2022-06-16": {
+        "2022-06-22": {
             "1. open": "275.1950",
             "2. high": "277.6900",
             "3. low": "241.5100",
-            "4. close": "244.9700",
-            "5. adjusted close": "244.9700",
-            "6. volume": "358725309",
+            "4. close": "253.1300",
+            "5. adjusted close": "253.1300",
+            "6. volume": "457898241",
             "7. dividend amount": "0.0000"
         },
         "2022-05-31": {
