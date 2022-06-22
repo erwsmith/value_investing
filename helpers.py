@@ -360,10 +360,8 @@ def yahoo_growth(sym):
     driver.get(url)
     full_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div/section/table[6]/tbody/tr[5]/td[2]"
     element = driver.find_element(by=By.XPATH, value=full_xpath)
-    analystGrowthRate = float(element.text.replace("%", ""))
+    analystGrowthRate = float(element.text.replace("%", "")) / 100
     driver.close()
-    
-    # analystGrowthRate = .1
 
     return analystGrowthRate
 
@@ -450,3 +448,5 @@ def sticker_price(df_financials, df_overview):
 # lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
 
 # print(read_time_series_monthly("ALK"))
+
+# print(yahoo_growth("alk"))
