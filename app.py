@@ -73,7 +73,9 @@ def evaluate():
 
         # plug parsed json files into helper functions
         management_check, df_mgt = management(df)
-        growth_check, df_growth = growth(df)
+        df_growth = growth(df)
+        df_growth.drop("eps", inplace=True)
+        df_growth.drop([2017], axis=1, inplace=True)
         df_overview = read_overview(sym)
         stickerPrice, safePrice = sticker_price(df, df_overview)
 
@@ -91,6 +93,9 @@ def evaluate():
         # TODO what does this do?
         df_mgt.index.name = None
         df_growth.index.name = None
+
+        # Company growth check
+        growth_check = df_growth["pass"].all()
 
         if growth_check:
             growth_message = "WONDERFUL!"
