@@ -304,14 +304,10 @@ def growth(df_financials):
               100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
     df = df[["eps", "revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
     df = df.transpose()
-    # df.drop([2017], axis=1, inplace=True)
     df["avg_growth"] = df.mean(axis=1)
     df["pass"] = df["avg_growth"] > 10
 
-    # Company growth check
-    growth_check = df["pass"].all()
-
-    return growth_check, df
+    return df
 
 
 def read_time_series_monthly(sym):
@@ -375,7 +371,7 @@ def sticker_price(df_financials, df_overview):
     pd.options.display.float_format = '{:,.2f}'.format
 
     # get bvps growth rate from growth()
-    _, df_growth = growth(df_financials)
+    df_growth = growth(df_financials)
     bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
 
     # get from alphavantage OVERVIEW
