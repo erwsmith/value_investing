@@ -1,18 +1,15 @@
-import os
-import re
+from dataclasses import dataclass
 import requests
 import urllib.parse
 import pandas as pd
 import json
 
-from symtable import SymbolTable
 from configparser import ConfigParser
-from flask import redirect, render_template, request, session
+from flask import redirect, render_template, session
 from functools import wraps
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.select import Select
 
 
 def usd(value):
@@ -88,7 +85,9 @@ def lookup(sym, func):
         response.raise_for_status()
         data = response.json()
         
-        # return data
+        # comment this line out to create json files 
+        # uncomment this line to return json response data directly 
+        return data
 
         # create json files for the response data
         filepath = f"json_files/{sym.upper()}_{func}.json"
@@ -112,9 +111,12 @@ def read_financial_reports(sym):
 
     # BALANCE SHEET - read and setup dataframe
     func = "BALANCE_SHEET"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
+    data = json.dumps(lookup(sym, func))
+
+    # uncomment the following 3 lines to read data from json files
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r+") as f:
+    #     data = f.read()
 
     # Process data and create clean dataframe
     balance_sheet = json.loads(data)
@@ -142,9 +144,12 @@ def read_financial_reports(sym):
 
     # CASH FLOW STATEMENT - read and setup dataframe
     func = "CASH_FLOW"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r") as f: 
-        data = f.read()
+    data = json.dumps(lookup(sym, func))
+
+    # uncomment the following 3 lines to read data from json files
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r") as f: 
+    #     data = f.read()
 
     # Process data and create clean dataframe
     cash_flow = json.loads(data)
@@ -166,9 +171,12 @@ def read_financial_reports(sym):
 
     # INCOME STATEMENT - read and setup dataframe
     func = "INCOME_STATEMENT"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r") as f: 
-        data = f.read()
+    data = json.dumps(lookup(sym, func))
+
+    # uncomment the following 3 lines to read data from json files
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r") as f: 
+    #     data = f.read()
 
     # Process data and create clean dataframe
     income = json.loads(data)
@@ -203,9 +211,12 @@ def read_overview(sym):
 
     # COMPANY OVERVIEW - read and setup dataframe
     func = "OVERVIEW"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
+    data = json.dumps(lookup(sym, func))
+
+    # uncomment the following 3 lines to read data from json files
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r+") as f:
+    #     data = f.read()
 
     # Process data and create clean dataframe
     overview = json.loads(data)
@@ -262,8 +273,8 @@ def management(df_financials):
 
     # Check average roic
     roic_avg = df.loc["roic","5y_average"]
-    df.loc[["roic"],["pass"]] = roic_avg > 10
     df.loc[["roic"],["target"]] = f"10 < roic %"
+    df.loc[["roic"],["pass"]] = roic_avg > 10
 
     # Mangement quality check
     management_check = df["pass"].all()
@@ -317,9 +328,12 @@ def read_time_series_monthly(sym):
 
     # Historical Price data: TIME_SERIES_MONTHLY_ADJUSTED - read and setup dataframe
     func = "TIME_SERIES_MONTHLY_ADJUSTED"
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
+    data = json.dumps(lookup(sym, func))
+
+    # uncomment the following 3 lines to read data from json files
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r+") as f:
+    #     data = f.read()
 
     # Process data and create list of annual historical prices in JUNE, same month as financial report data
     price_history = json.loads(data)
@@ -420,10 +434,8 @@ def sticker_price(df_financials, df_overview):
 
 # FUNCTION TESTING
 
-# sym = "MSFT"
-
+# sym = "DAL"
 # df = read_financial_reports(sym)
-
 # print(df)
 
 # print(management(df))
