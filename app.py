@@ -45,6 +45,13 @@ def index():
     return render_template("index.html")
 
 
+# @app.route("/historicalData", methods=["GET", "POST"])
+# @login_required
+# def historicalData():
+#     if request.method == "GET":
+#         return render_template("historicalData.html")
+
+
 @app.route("/evaluate", methods=["GET", "POST"])
 @login_required
 def evaluate():
