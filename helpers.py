@@ -318,6 +318,7 @@ def growth(df_financials):
     df = df.transpose()
     df["avg_growth"] = df.mean(axis=1)
     df["pass"] = df["avg_growth"] > 10
+    df["target"] = "avg_growth > 10%"
 
     return df
 
@@ -429,24 +430,3 @@ def sticker_price(df_financials, df_overview):
     safePrice = stickerPrice / 2
 
     return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
-
-# FUNCTION TESTING
-# sym = "DAL"
-# df = read_financial_reports(sym)
-# print(df)
-# print(management(df))
-# _, d = growth(df)
-# print(d)
-# o = read_overview(sym)
-# print(o)
-# print(sticker_price(df, o))
-# print(read_quote(sym))
-# print(iex_get_quote(sym))
-# sym = "UFI"
-# lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
-# for func in lookup_functions:
-#     lookup(sym, func)
-
-# lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
-# print(read_time_series_monthly("ALK"))
-# print(yahoo_growth("alk"))
