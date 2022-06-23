@@ -90,9 +90,9 @@ def lookup(sym, func):
         return data
 
         # create json files for the response data
-        filepath = f"json_files/{sym.upper()}_{func}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        # filepath = f"json_files/{sym.upper()}_{func}.json"
+        # with open(filepath, "w", encoding="utf-8") as f:
+        #     json.dump(data, f, ensure_ascii=False, indent=4)
 
     except requests.RequestException:
         return None
