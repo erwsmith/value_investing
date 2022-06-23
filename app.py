@@ -6,8 +6,6 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
 from helpers import *
-# from helpers import apology, login_required, usd, lookup, read_financial_reports, management, growth, iex_get_quote, sticker_price, read_overview
-
 
 # Configure application
 app = Flask(__name__)
@@ -50,6 +48,7 @@ def index():
 @app.route("/evaluate", methods=["GET", "POST"])
 @login_required
 def evaluate():
+    """Lookup/calculate company price, growth rate, management numbers, and sticker price"""
     if request.method == "GET":
         return render_template("evaluate.html")
 
