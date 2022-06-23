@@ -15,7 +15,7 @@
             <br>
             <p class="text-start">This project implements a website that analyzes the “value” of a given company based on historical SEC filings. This tool allows the user to input a company’s ticker symbol, check the current price, and compare the current price to an estimated “sticker price” for the company based on value investing theory.</p>
             <br>
-            <p>Value investing requires analysis of the financial position of a company using 5 key metrics to determine the estimated intrinsic value and “sticker price”. We want to see a comparison between the estimated sticker price and the current stock price. If the current stock price is much lower than the estimated sticker price, it may be a good time to buy!</p>
+            <p>Value investing requires analysis of the financial position of a company using several key metrics to determine the estimated intrinsic value and “sticker price”. We want to see a comparison between the estimated sticker price and the current stock price. If the current stock price is much lower than the estimated sticker price, it may be a good time to buy!</p>
             <br>
             <p>Definition from <a href="https://www.investopedia.com/terms/v/valueinvesting.asp">investopedia:</a></p>
             <blockquote cite="https://www.investopedia.com/terms/v/valueinvesting.asp">
@@ -24,37 +24,87 @@
         <hr>    
         <h3 id="specification">Specification</h3>
         <br>
-            <p><code>scraper</code></p>
+        <h4><code>helpers.py</code></h4>
+            <p><code>lookup()</code></p>
+                <ul>
+                    <li>This function takes in the company's ticker symbol and the desired API function, and outputs the response in json format.</li>
+                    <li>The source of the data is <a href="https://www.alphavantage.co/">alphavantage.</a></li>
+                </ul>
+            <p><code>read_financial_reports()</code></p>
+                <ul>
+                    <li>This function calls lookup() to get the company's financial reports from alphavantage:
+                        <li>Balance Sheet.</li>
+                        <li>Cash Flow Statement.</li>
+                        <li>Income Statement.</li>
+                    </li>
+                    <li>After reading in the financial reports, the following values are calculated:
+                        <ul>
+                            <li>Debt to Equity (DE) Ratio.</li>
+                            <li>Current Ratio.</li>
+                            <li>Long Term Debt.</li>
+                            <li>Invested Capital.</li>
+                            <li>Shares Outstanding.</li>
+                            <li>Total Shareholder Equity.</li>
+                            <li>Free Cash Flow.</li>
+                            <li>Non Operating Cash.</li>
+                            <li>Operating Cash Flow.</li>
+                            <li>Net Operating Profit After Tax (NOPAT).</li>
+                            <li>Total Revenue.</li>
+                            <li>Net Income.</li>
+                          </ul>
+                    </li>
+                    <li>These values, required for evaluating company management and growth, are combined and returned as a single pandas dataframe.</li>
+                </ul>
+            <p><code>read_overview()</code></p>
+                <ul>
+                    <li>This funciton calls lookup() to read in the company "overview" data from alphavantage.</li>
+                    <li>The required data is normalized and returned as a pandas dataframe .</li>
+                </ul>
+            <p><code>management()</code></p>
+                <ul>
+                    <li>This function takes in the financial reports dataframe and returns a management check and a dataframe with key values for evaluating company management:
+                        <li>DE Ratio (0 &lt; total liabilities / total shareholder equity &lt; 5).</li>
+                        <li>Current Ratio (current assets / current liabilities &gt; 1).</li>
+                        <li>Durability (Long term debt / annual free cash flow &lt; 3).</li>
+                        <li>Return on Investment Capital (NOPAT / invested capital &gt; 10%).</li>
+                    </li>
+                </ul>
+            <p><code>growth()</code></p>
+                <ul>
+                    <li>This function calculates 4 key growth rates and returns them as a pandas dataframe:
+                        <li>Sales (Revenue) Growth Rate.</li>
+                        <li>Earnings Per Share Growth Rate.</li>
+                        <li>Equity (BVPS) Growth Rate.</li>
+                        <li>Operating Cash Flow Growth Rate.</li>
+                    </li>
+                </ul>
+            <p><code>read_time_series_monthly()</code></p>
+                <ul>
+                    <li>This function calls lookup() to get historical pricing data.</li>
+                    <li>Data must be pared down to include only one sample per year over the last 5 years.</li>
+                    <li>A pandas dataframe is returned with this 5 year pricing history.</li>
+                </ul>
+            <p><code>yahoo_growth()</code></p>
                 <ul class = "text-align: justify max-width: 1000px margin: auto">
-                    <li>Scrape public company data from <a href="https://www.sec.gov/dera/data/financial-statement-data-sets.html">the SEC website</a>. 10-k filings from the last 10 years should be downloaded and parsed if available.</li>
+                    <li>This function uses the selenium web automation package to scrape the analyst 5 year estimated growth rate from <a href="finance.yahoo.com">yahoo finance</a>.</li>
+                    <li>Getting the desired data point required using the full xpath</li>
                 </ul>
-            <p><code>management</code></p>
+            <p><code>sticker_price()</code></p>
                 <ul>
-                    <li>DE Ratio (0 &lt; total liabilities / total shareholder equity &lt; 5).</li>
-                    <li>Current Ratio (current assets / current liabilities &gt; 1).</li>
-                    <li>Durability (Long term debt / annual free cash flow &lt; 3).</li>
-                    <li>Return on Investment Capital.</li>
-                    <li>Does the CEO buy stocks of the company?</li>
-                    <li>Does the CEO own a large amount of stock?</li>
-                </ul>
-            <p><code>key_metrics</code></p>
-                <ul>
-                    <li>Calculate the intrinsic value of a company based on the data available.</li>
-                    <li>Sales Growth Rate.</li>
-                    <li>Earnings Per Share Growth Rate.</li>
-                    <li>Equity Growth Rate (BVPS).</li>
-                    <li>Operating Cash Flow Growth Rate.</li>
-                </ul>
-            <p><code>sticker_price</code></p>
-                <ul>
-                    <li>Current EPS (TTM EPS).</li>
-                    <li>Future EPS growth rate (estimated).</li>
-                    <li>Based primarily on historical Equity (BVPS) growth rate, then on EPS, Sales, &amp; Cash Flow growth rates.</li>
-                    <li>Compare to analyst’s 5 year projection <a href="https://www.zacks.com/stock/quote/NKE/detailed-estimates">zacks.com - detailed estimates</a>, use the lower of the 2.</li>
-                    <li>Future PE (estimated).</li>
-                    <li>Default future PE = EPS growth rate estimate x 2.</li>
-                    <li>Compare Default future PE to historical average PE, use lower of the 2.</li>
-                    <li>Minimum Acceptable Rate of Return % (Rule #1 MARR = 15%). value_investing</li>
+                    <li>This function takes in the financial reports and overview dataframes and returns the company's sticker price and "safe price"</li> 
+                    <li>In order to find the sticker price, the following numbers are required:
+                        <li>Current EPS (TTM EPS).</li>
+                        <li>Future EPS growth rate (estimated).
+                            <li>This is based primarily on historical Equity (BVPS) growth rate, then on EPS, Sales, &amp; Cash Flow growth rates.</li>
+                            <li>Compare to analyst’s 5 year growth projection obtained in yahoo_growth(), use the lower of the 2.</li>
+                        </li>
+                        <li>Future PE (estimated).
+                            <li>Default future PE = EPS growth rate estimate x 2.</li>
+                            <li>Compare Default future PE to historical average PE, use lower of the 2.</li>
+                        </li>
+                        <li>Minimum Acceptable Rate of Return % (Rule #1 MARR = 15%).</li>
+                        <li>The "safe price" is simply the sticker price / 2. It is the recommended maximum purchase price, representing a "safe" discount</li>
+                    </li>
                 </ul>
             </p>
     </div>
