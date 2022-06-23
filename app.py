@@ -63,11 +63,6 @@ def evaluate():
         else:
             flash("Request failed. Is symbol valid?")        
 
-        # USE THE FOLLOWING TO BYPASS JSON FILE CREATION, GO STRAIGHT TO READING DATA
-        lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW", "TIME_SERIES_MONTHLY_ADJUSTED"]
-        for func in lookup_functions:
-            lookup(sym, func)
-
         # get financial reports dataframe
         df = read_financial_reports(sym)
 
