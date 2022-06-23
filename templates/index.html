@@ -7,13 +7,16 @@
 {% block main %}
 
     <div class="bod">
-        <h1 id="stock-analysis-for-value-investing">Stock Analysis for Value Investing</h1>
+        <h1>Stock Analysis for Value Investing</h1>
+        <hr>
+        <h4>Eric R.W. Smith</h4>
+        <h4>Salt Lake City, Utah, USA</h4>
         <hr>
         <h3 id="video-demo-url"><a href="https://youtu.be/dQw4w9WgXcQ">Video Demo</a></h3>
-        <hr>
+        <br>
         <h3 id="description">Description</h3>
             <br>
-            <p class="text-start">This project builds upon the CS50X finance problem set to implement a website that analyzes the “value” of a given company based on historical SEC filings. This tool allows the user to input a company’s ticker symbol, check the current price, and compare the current price to an estimated “sticker price” for the company based on value investing theory.</p>
+            <p class="text-start">This project builds upon the CS50X finance problem set to implement a website that analyzes the value of a given company based on historical SEC filings. This tool allows the user to input a company’s ticker symbol, check the current price, and compare the current price to an estimated “sticker price” for the company based on value investing theory.</p>
             <br>
             <p>Value investing requires analysis of the financial position of a company using several key metrics to determine the estimated intrinsic value and “sticker price”. We want to see a comparison between the estimated sticker price and the current stock price. If the current stock price is much lower than the estimated sticker price, it may be a good time to buy!</p>
             <br>
@@ -29,6 +32,7 @@
                 <ul>
                     <li>This function takes in the company's ticker symbol and the desired API function, and outputs the response in json format.</li>
                     <li>The source of the data is <a href="https://www.alphavantage.co/">alphavantage.</a></li>
+                    <li>Alphavantage is an excellent source for free SEC filing data, I discovered it after working with some other financial data APIs and found it to be by far the best.</li>
                 </ul>
             <p><code>read_financial_reports()</code></p>
                 <ul>
@@ -86,7 +90,7 @@
                 </ul>
             <p><code>yahoo_growth()</code></p>
                 <ul class = "text-align: justify max-width: 1000px margin: auto">
-                    <li>This function uses the selenium web automation package to scrape the analyst 5 year estimated growth rate from <a href="finance.yahoo.com">yahoo finance</a>.</li>
+                    <li>This function uses the selenium web automation package to scrape the analyst 5 year estimated growth rate from <a href="https://finance.yahoo.com/lookup">yahoo finance</a>.</li>
                     <li>Getting the desired data point required using the full xpath</li>
                 </ul>
             <p><code>sticker_price()</code></p>
