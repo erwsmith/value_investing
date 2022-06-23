@@ -84,9 +84,9 @@ def lookup(sym, func):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        
-        # comment this line out to create json files 
-        # uncomment this line to return json response data directly 
+
+        # comment this line out to create json files
+        # uncomment this line to return json response data directly
         return data
 
         # create json files for the response data
@@ -128,7 +128,7 @@ def read_financial_reports(sym):
     df_balance.replace("None", "0", inplace=True)
 
     # Reduce df to have only required columns, cast values as float
-    df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities", 
+    df_balance = df_balance[["totalLiabilities", "totalShareholderEquity", "totalCurrentLiabilities",
                              "totalCurrentAssets", "longTermDebt", "capitalLeaseObligations", "shortTermDebt",
                              "commonStock", "retainedEarnings", "commonStockSharesOutstanding"]]
     df_balance = df_balance.astype('float')
@@ -141,14 +141,13 @@ def read_financial_reports(sym):
     cols = ["totalShareholderEquity", "shortTermDebt", "longTermDebt", "capitalLeaseObligations"]
     df_balance["investedCapital"] = df_balance[cols].sum(axis=1)
 
-
     # CASH FLOW STATEMENT - read and setup dataframe
     func = "CASH_FLOW"
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
     # filepath = f"json_files/{sym}_{func}.json"
-    # with open(filepath, "r") as f: 
+    # with open(filepath, "r") as f:
     #     data = f.read()
 
     # Process data and create clean dataframe
@@ -168,14 +167,13 @@ def read_financial_reports(sym):
     df_cash["freeCashFlow"] = df_cash["operatingCashflow"] - df_cash["capitalExpenditures"]
     df_cash["nonOperatingCash"] = df_cash["cashflowFromInvestment"] + df_cash["cashflowFromFinancing"]
 
-
     # INCOME STATEMENT - read and setup dataframe
     func = "INCOME_STATEMENT"
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
     # filepath = f"json_files/{sym}_{func}.json"
-    # with open(filepath, "r") as f: 
+    # with open(filepath, "r") as f:
     #     data = f.read()
 
     # Process data and create clean dataframe
@@ -199,7 +197,8 @@ def read_financial_reports(sym):
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
 
     # COMBINE DATAFRAMES
-    df_financials = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital", "commonStockSharesOutstanding", "totalShareholderEquity"]].join(df_cash[["freeCashFlow", "nonOperatingCash", "operatingCashflow"]]).join(df_income[["nopat", "totalRevenue", "netIncome"]])
+    df_financials = df_balance[["de_ratio", "current_ratio", "longTermDebt", "investedCapital", "commonStockSharesOutstanding", "totalShareholderEquity"]].join(
+        df_cash[["freeCashFlow", "nonOperatingCash", "operatingCashflow"]]).join(df_income[["nopat", "totalRevenue", "netIncome"]])
 
     return df_financials
 
@@ -222,7 +221,7 @@ def read_overview(sym):
     overview = json.loads(data)
     df_overview = pd.json_normalize(overview)
     df_overview.replace("None", "0", inplace=True)
-    
+
     return df_overview
 
 
@@ -251,30 +250,30 @@ def management(df_financials):
 
     # Calculate 5 year average values
     df["5y_average"] = df.mean(axis=1)
-    
+
     # Create pass/fail column and target colum
     df["pass"] = 0
     df["target"] = 0
 
-    # Check average de ratio 
-    de_avg = df.loc["de_ratio","5y_average"]
-    df.loc[["de_ratio"],["pass"]] = (0 < de_avg) & (de_avg < 5)
-    df.loc[["de_ratio"],["target"]] = f"0 < de ratio < 5"
+    # Check average de ratio
+    de_avg = df.loc["de_ratio", "5y_average"]
+    df.loc[["de_ratio"], ["pass"]] = (0 < de_avg) & (de_avg < 5)
+    df.loc[["de_ratio"], ["target"]] = f"0 < de ratio < 5"
 
     # Check average current ratio
-    current_avg = df.loc["current_ratio","5y_average"]
-    df.loc[["current_ratio"],["pass"]] = current_avg > 1
-    df.loc[["current_ratio"],["target"]] = f"1 < current ratio"
+    current_avg = df.loc["current_ratio", "5y_average"]
+    df.loc[["current_ratio"], ["pass"]] = current_avg > 1
+    df.loc[["current_ratio"], ["target"]] = f"1 < current ratio"
 
     # Check average durability
-    durability_avg = df.loc["durability","5y_average"]
-    df.loc[["durability"],["pass"]] = (durability_avg < 3) & (durability_avg > 0)
-    df.loc[["durability"],["target"]] = f"0 < durability < 3"
+    durability_avg = df.loc["durability", "5y_average"]
+    df.loc[["durability"], ["pass"]] = (durability_avg < 3) & (durability_avg > 0)
+    df.loc[["durability"], ["target"]] = f"0 < durability < 3"
 
     # Check average roic
-    roic_avg = df.loc["roic","5y_average"]
-    df.loc[["roic"],["target"]] = f"10 < roic %"
-    df.loc[["roic"],["pass"]] = roic_avg > 10
+    roic_avg = df.loc["roic", "5y_average"]
+    df.loc[["roic"], ["target"]] = f"10 < roic %"
+    df.loc[["roic"], ["pass"]] = roic_avg > 10
 
     # Mangement quality check
     management_check = df["pass"].all()
@@ -290,21 +289,22 @@ def growth(df_financials):
     df = df_financials[["totalRevenue", "netIncome", "commonStockSharesOutstanding", "totalShareholderEquity", "operatingCashflow"]]
     df = df.sort_index()
 
-    # NOTE regarding pandas built-in percent change calculation: 
+    # NOTE regarding pandas built-in percent change calculation:
     # if the 2 values being compared are negative, and the new value is lower than the old, the output of pct_change() will be positive, which is VERY erroneous
-    # pct_change example: 
+    # pct_change example:
     # df.insert(len(df.columns), "revenue_growth_bad", 100 * df["totalRevenue"].pct_change())
 
     # Better way of calculating percent change:
     # total revenue (Sales) growth rate
-    df.insert(len(df.columns), "revenue_growth", 100 * (df["totalRevenue"] - df["totalRevenue"].shift()) / abs(df["totalRevenue"].shift()))
+    df.insert(len(df.columns), "revenue_growth", 100 * (df["totalRevenue"] -
+              df["totalRevenue"].shift()) / abs(df["totalRevenue"].shift()))
 
     # Earnings Per Share Growth Rate.
     # (net income - preferred dividends) / commonStockSharesOutstanding
     # TODO preferred dividends? Haven't found yet, but this seems to only make a minor change when looking as MSFT
     df.insert(len(df.columns), "eps", df["netIncome"] / df["commonStockSharesOutstanding"])
     df.insert(len(df.columns), "eps_growth", 100 * (df["eps"] - df["eps"].shift()) / abs(df["eps"].shift()))
-    
+
     # Equity Growth Rate (BVPS).
     # totalShareholderEquity / commonStockSharesOutstanding
     df.insert(len(df.columns), "bvps", df["totalShareholderEquity"] / df["commonStockSharesOutstanding"])
@@ -312,7 +312,7 @@ def growth(df_financials):
 
     # Operating Cash Flow Growth Rate.
     # operatingCashflow
-    df.insert(len(df.columns), "cashflow_growth", 
+    df.insert(len(df.columns), "cashflow_growth",
               100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
     df = df[["eps", "revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
     df = df.transpose()
@@ -362,13 +362,13 @@ def read_time_series_monthly(sym):
 
 def yahoo_growth(sym):
     """Use selenium to obtain analyst growth rate from yahoo finance"""
-    
+
     # driver setup
     options = Options()
     options.headless = True
     options.add_argument("--window-size=192,120")
     driver = webdriver.Chrome(options=options)
-    
+
     # get table element using full xpath
     url = f"https://finance.yahoo.com/quote/{sym}/analysis?p={sym}"
     driver.get(url)
@@ -385,7 +385,7 @@ def sticker_price(df_financials, df_overview):
     Calculate company "Sticker Price" or the estimated actual value, and the "Margin of Safety Price" to compare to current price
     """
 
-    # Set number formatting for all dataframes to display as X.XX    
+    # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
     # get bvps growth rate from growth()
@@ -400,7 +400,7 @@ def sticker_price(df_financials, df_overview):
     sym = df_overview.loc[0, "Symbol"]
     price = read_time_series_monthly(sym)
     df_pe = price.join(df_pe)
-    df_pe.loc[[2022],["eps"]] = currentEPS
+    df_pe.loc[[2022], ["eps"]] = currentEPS
     df_pe = df_pe.astype('float')
     df_pe["pe"] = df_pe["price"] / df_pe["eps"]
     avgPE = df_pe["pe"].mean()
@@ -408,7 +408,7 @@ def sticker_price(df_financials, df_overview):
     # get analyst growth rate from yahoo finance
     try:
         analystGrowthRate = yahoo_growth(sym)
-        
+
         # set projected growth rate, cap at 15%
         growthRate = min(analystGrowthRate, bvpsGrowthRate)
         if growthRate > .15:
@@ -416,10 +416,10 @@ def sticker_price(df_financials, df_overview):
 
     except:
         growthRate = bvpsGrowthRate
-    
-    # calculate estimated EPS 10 years from now  
+
+    # calculate estimated EPS 10 years from now
     futureEPS = currentEPS * ((1 + growthRate)**10)
-    
+
     # calculate estimated price in 10 years
     defaultPE = growthRate * 200
     futureMarketPrice = futureEPS * min(avgPE, defaultPE)
@@ -430,35 +430,23 @@ def sticker_price(df_financials, df_overview):
 
     return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
 
-
-
 # FUNCTION TESTING
-
 # sym = "DAL"
 # df = read_financial_reports(sym)
 # print(df)
-
 # print(management(df))
-
 # _, d = growth(df)
 # print(d)
-
 # o = read_overview(sym)
 # print(o)
-
 # print(sticker_price(df, o))
-
 # print(read_quote(sym))
-
 # print(iex_get_quote(sym))
-
 # sym = "UFI"
 # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
 # for func in lookup_functions:
 #     lookup(sym, func)
 
 # lookup("UFI", "TIME_SERIES_MONTHLY_ADJUSTED")
-
 # print(read_time_series_monthly("ALK"))
-
 # print(yahoo_growth("alk"))
