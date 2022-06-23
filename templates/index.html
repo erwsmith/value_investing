@@ -13,11 +13,11 @@
         <hr>
         <h3 id="description">Description</h3>
             <br>
-            <p class="text-start">This project implements a website that analyzes the “value” of a given company based on historical SEC filings. This tool allows the user to input a company’s ticker symbol, check the current price, and compare the current price to an estimated “sticker price” for the company based on value investing theory.</p>
+            <p class="text-start">This project builds upon the CS50X finance problem set to implement a website that analyzes the “value” of a given company based on historical SEC filings. This tool allows the user to input a company’s ticker symbol, check the current price, and compare the current price to an estimated “sticker price” for the company based on value investing theory.</p>
             <br>
             <p>Value investing requires analysis of the financial position of a company using several key metrics to determine the estimated intrinsic value and “sticker price”. We want to see a comparison between the estimated sticker price and the current stock price. If the current stock price is much lower than the estimated sticker price, it may be a good time to buy!</p>
             <br>
-            <p>Definition from <a href="https://www.investopedia.com/terms/v/valueinvesting.asp">investopedia:</a></p>
+            <p>From <a href="https://www.investopedia.com/terms/v/valueinvesting.asp">investopedia.com</a>:</p>
             <blockquote cite="https://www.investopedia.com/terms/v/valueinvesting.asp">
                 <p>Value investing is an investment strategy that involves picking stocks that appear to be trading for less than their intrinsic or book value. Value investors actively ferret out stocks they think the stock market is underestimating. They believe the market overreacts to good and bad news, resulting in stock price movements that do not correspond to a company's long-term fundamentals. The overreaction offers an opportunity to profit by buying stocks at discounted prices—on sale.</p>
             </blockquote>
@@ -107,6 +107,16 @@
                     </li>
                 </ul>
             </p>
+        <br>
+        <h4><code>app.py</code></h4>
+            <p><code>evaluate()</code></p>
+                <ul>
+                    <li>This function calls several functions from helpers.py to process company data, and returns the output at evaluated.html.</li>
+                    <li>The discount value is calculated based on the sticker price and the current price. This determines if the company is undervalued, and if it is "fully discounted" (half off the sticker price).</li>
+                    <li>The management of the company is evaluated, if the company passes all management checkes, the managment is rated as "wonderful" </li>
+                    <li>The growth of the company is evaluated, if the company passes all growth checks, the company's growth is rated as "wonderful". </li>
+                    <li>The data sent to evaluated.html allows the user to quickly see if the company is an attractive "buy" or not.</li>
+                </ul>
     </div>
 
 {% endblock %}
