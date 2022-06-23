@@ -23,12 +23,11 @@ nav .navbar-brand .green
 }
 
 h1 {
-    text-align: justify;
+    text-align: left;
     max-width: 750px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 20px;
-    padding: 10px;
 }
 
 h3 {
