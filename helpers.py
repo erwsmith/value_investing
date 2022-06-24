@@ -100,14 +100,12 @@ def lookup(sym, func):
 
 def read_financial_reports(sym):
     """
-    Read financial report json files and get values to be used for management and growth calculations
+    Read financial report json data and get values to be used for management and growth calculations
     Includes Balance Sheet, Income Statement, and Cash Flow Statement
     """
 
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
-
-    # lookup_functions = ["BALANCE_SHEET", "CASH_FLOW", "INCOME_STATEMENT", "OVERVIEW"]
 
     # BALANCE SHEET - read and setup dataframe
     func = "BALANCE_SHEET"
