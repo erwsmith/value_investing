@@ -11,6 +11,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
+"""
+See README.md for project description
+"""
+
 
 def usd(value):
     """Format value as USD."""
