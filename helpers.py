@@ -113,12 +113,12 @@ def read_financial_reports(sym):
 
     # BALANCE SHEET - read and setup dataframe
     func = "BALANCE_SHEET"
-    data = json.dumps(lookup(sym, func))
+    # data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
-    # filepath = f"json_files/{sym}_{func}.json"
-    # with open(filepath, "r+") as f:
-    #     data = f.read()
+    filepath = f"json_files/{sym}_{func}.json"
+    with open(filepath, "r+") as f:
+        data = f.read()
 
     # Process data and create clean dataframe
     balance_sheet = json.loads(data)
@@ -183,7 +183,7 @@ def read_financial_reports(sym):
     annual_reports = income["annualReports"]
     df_income = pd.json_normalize(annual_reports)
     df_income["fiscalDateEnding"] = pd.to_datetime(df_income["fiscalDateEnding"])
-    df_income['year'] = pd.DatetimeIndex(df_income['fiscalDateEnding']).year
+    df_income["year"] = pd.DatetimeIndex(df_income['fiscalDateEnding']).year
     df_income.set_index("year", inplace=True)
     df_income.replace("None", "0", inplace=True)
 
@@ -281,7 +281,7 @@ def management(df_financials):
     management_check = df["pass"].all()
 
     return management_check, df
-
+    
 
 def growth(df_financials):
     """
@@ -304,26 +304,38 @@ def growth(df_financials):
     # Earnings Per Share Growth Rate.
     # (net income - preferred dividends) / commonStockSharesOutstanding
     # TODO preferred dividends? Haven't found yet, but this seems to only make a minor change when looking as MSFT
-    df.insert(len(df.columns), "eps", df["netIncome"] / df["commonStockSharesOutstanding"])
-    df.insert(len(df.columns), "eps_growth", 100 * (df["eps"] - df["eps"].shift()) / abs(df["eps"].shift()))
+    df.insert(len(df.columns), "EPS", df["netIncome"] / df["commonStockSharesOutstanding"])
+    df.insert(len(df.columns), "EPS_growth", 100 * (df["EPS"] - df["EPS"].shift()) / abs(df["EPS"].shift()))
 
     # Equity Growth Rate (BVPS).
     # totalShareholderEquity / commonStockSharesOutstanding
-    df.insert(len(df.columns), "bvps", df["totalShareholderEquity"] / df["commonStockSharesOutstanding"])
-    df.insert(len(df.columns), "bvps_growth", 100 * (df["bvps"] - df["bvps"].shift()) / abs(df["bvps"].shift()))
+    df.insert(len(df.columns), "BVPS", df["totalShareholderEquity"] / df["commonStockSharesOutstanding"])
+    df.insert(len(df.columns), "BVPS_growth", 100 * (df["BVPS"] - df["BVPS"].shift()) / abs(df["BVPS"].shift()))
 
     # Operating Cash Flow Growth Rate.
     # operatingCashflow
     df.insert(len(df.columns), "cashflow_growth",
               100 * (df["operatingCashflow"] - df["operatingCashflow"].shift()) / abs(df["operatingCashflow"].shift()))
-    df = df[["eps", "revenue_growth", "eps_growth", "bvps_growth", "cashflow_growth"]]
-    df = df.transpose()
-    df["avg_growth"] = df.mean(axis=1)
-    df["pass"] = df["avg_growth"] > 10
-    df["target"] = "avg_growth > 10%"
+    
+    # setup history dataframe
+    df_history = df[["totalRevenue", "EPS", "BVPS", "operatingCashflow"]]
+    df_history.insert(0, "Revenue (Mil)", df_history["totalRevenue"] / 1_000_000)
+    df_history.insert(0, "Cashflow (Mil)", df_history["operatingCashflow"] / 1_000_000)
+    df_history = df_history.drop(columns=["totalRevenue", "operatingCashflow"])
+    df_history.style.format(precision=0, subset=["Revenue (Mil)", "Cashflow (Mil)"])
+    df_history = df_history.transpose()
+    
+    # setup growth rate dataframe
+    df_growth = df[["EPS", "revenue_growth", "EPS_growth", "BVPS_growth", "cashflow_growth"]]
+    df_growth = df_growth.transpose()
+    df_growth["avg_growth"] = df_growth.mean(axis=1)
+    df_growth["pass"] = df_growth["avg_growth"] > 10
+    df_growth["target"] = "avg_growth > 10%"
 
-    return df
+    return df_history, df_growth
 
+df_history, df_growth = growth(read_financial_reports("MSFT"))
+print(df_history)
 
 def read_time_series_monthly(sym):
     # Set number formatting for all dataframes to display as X.XX
@@ -391,21 +403,21 @@ def sticker_price(df_financials, df_overview):
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
-    # get bvps growth rate from growth()
-    df_growth = growth(df_financials)
-    bvpsGrowthRate = df_growth.loc["bvps_growth", "avg_growth"]
+    # get BVPS growth rate from growth()
+    _, df_growth = growth(df_financials)
+    BVPSGrowthRate = df_growth.loc["BVPS_growth", "avg_growth"]
 
     # get from alphavantage OVERVIEW
     currentEPS = float(df_overview.loc[0, "EPS"])
 
     # calculate average PE ratio (EPS/price)
-    df_pe = pd.DataFrame(df_growth.drop(["avg_growth", "pass"], axis=1).transpose()["eps"])
+    df_pe = pd.DataFrame(df_growth.drop(["avg_growth", "pass"], axis=1).transpose()["EPS"])
     sym = df_overview.loc[0, "Symbol"]
     price = read_time_series_monthly(sym)
     df_pe = price.join(df_pe)
-    df_pe.loc[[2022], ["eps"]] = currentEPS
+    df_pe.loc[[2022], ["EPS"]] = currentEPS
     df_pe = df_pe.astype('float')
-    df_pe["pe"] = df_pe["price"] / df_pe["eps"]
+    df_pe["pe"] = df_pe["price"] / df_pe["EPS"]
     avgPE = df_pe["pe"].mean()
 
     # get analyst growth rate from yahoo finance
@@ -413,12 +425,12 @@ def sticker_price(df_financials, df_overview):
         analystGrowthRate = yahoo_growth(sym)
 
         # set projected growth rate, cap at 15%
-        growthRate = min(analystGrowthRate, bvpsGrowthRate)
+        growthRate = min(analystGrowthRate, BVPSGrowthRate)
         if growthRate > .15:
             growthRate = .15
 
     except:
-        growthRate = bvpsGrowthRate
+        growthRate = BVPSGrowthRate
 
     # calculate estimated EPS 10 years from now
     futureEPS = currentEPS * ((1 + growthRate)**10)
