@@ -74,8 +74,8 @@ def evaluate():
 
         # plug parsed json files into helper functions
         management_check, df_mgt = management(df)
-        df_growth = growth(df)
-        df_growth.drop("eps", inplace=True)
+        df_history, df_growth = growth(df)
+        df_growth.drop("EPS", inplace=True)
         df_growth.drop([2017], axis=1, inplace=True)
         df_overview = read_overview(sym)
         stickerPrice, safePrice = sticker_price(df, df_overview)
@@ -110,8 +110,8 @@ def evaluate():
 
         return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
                                growth_message=growth_message, management_message=management_message, 
-                               tables=[df_mgt.to_html(classes='data'), df_growth.to_html(classes='data')], 
-                               titles=["na", "Management", "Growth"], stickerPrice=usd(stickerPrice), 
+                               tables=[df_mgt.to_html(classes='data'), df_history.to_html(classes='data'), df_growth.to_html(classes='data')], 
+                               titles=["na", "Management", "History", "Growth"], stickerPrice=usd(stickerPrice), 
                                safePrice=usd(safePrice), undervalued=undervalued, 
                                fullyDiscounted=fullyDiscounted)
 
