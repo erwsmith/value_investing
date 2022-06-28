@@ -76,7 +76,8 @@ def evaluate():
         management_check, df_mgt = management(df)
         df_history, df_growth = growth(df)
         df_growth.drop("EPS", inplace=True)
-        df_growth.drop([2017], axis=1, inplace=True)
+        df_growth.fillna("-", inplace=True)
+        # df_growth.drop([2017], axis=1, inplace=True)
         df_overview = read_overview(sym)
         stickerPrice, safePrice = sticker_price(df, df_overview)
 
