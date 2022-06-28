@@ -93,7 +93,7 @@ def lookup(sym, func):
         # uncomment this line to return json response data directly
         return data
 
-        # create json files for the response data
+        # uncomment the following 3 lines to read data from json files
         # filepath = f"json_files/{sym.upper()}_{func}.json"
         # with open(filepath, "w", encoding="utf-8") as f:
         #     json.dump(data, f, ensure_ascii=False, indent=4)
@@ -113,12 +113,14 @@ def read_financial_reports(sym):
 
     # BALANCE SHEET - read and setup dataframe
     func = "BALANCE_SHEET"
-    # data = json.dumps(lookup(sym, func))
+    
+    # uncomment this line to return json response data directly
+    data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
-    filepath = f"json_files/{sym}_{func}.json"
-    with open(filepath, "r+") as f:
-        data = f.read()
+    # filepath = f"json_files/{sym}_{func}.json"
+    # with open(filepath, "r+") as f:
+    #     data = f.read()
 
     # Process data and create clean dataframe
     balance_sheet = json.loads(data)
@@ -145,6 +147,7 @@ def read_financial_reports(sym):
 
     # CASH FLOW STATEMENT - read and setup dataframe
     func = "CASH_FLOW"
+    # uncomment this line to return json response data directly
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
@@ -171,6 +174,7 @@ def read_financial_reports(sym):
 
     # INCOME STATEMENT - read and setup dataframe
     func = "INCOME_STATEMENT"
+    # uncomment this line to return json response data directly
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
@@ -212,6 +216,7 @@ def read_overview(sym):
 
     # COMPANY OVERVIEW - read and setup dataframe
     func = "OVERVIEW"
+    # uncomment this line to return json response data directly
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
@@ -321,12 +326,10 @@ def growth(df_financials):
     df_history = df[["totalRevenue", "EPS", "BVPS", "operatingCashflow"]]
     df_history.insert(0, "Revenue (Mil)", df_history["totalRevenue"] / 1_000_000)
     df_history.insert(0, "Cashflow (Mil)", df_history["operatingCashflow"] / 1_000_000)
-    df_history = df_history.drop(columns=["totalRevenue", "operatingCashflow"])
-    df_history.style.format(precision=0, subset=["Revenue (Mil)", "Cashflow (Mil)"])
-    df_history = df_history.transpose()
+    df_history = df_history.drop(columns=["totalRevenue", "operatingCashflow"]).astype(object).transpose()
     
     # setup growth rate dataframe
-    df_growth = df[["EPS", "revenue_growth", "EPS_growth", "BVPS_growth", "cashflow_growth"]]
+    df_growth = df[["EPS", "cashflow_growth", "revenue_growth", "EPS_growth", "BVPS_growth"]]
     df_growth = df_growth.transpose()
     df_growth["avg_growth"] = df_growth.mean(axis=1)
     df_growth["pass"] = df_growth["avg_growth"] > 10
@@ -334,8 +337,8 @@ def growth(df_financials):
 
     return df_history, df_growth
 
-df_history, df_growth = growth(read_financial_reports("MSFT"))
-print(df_history)
+# df_history, df_growth = growth(read_financial_reports("MSFT"))
+# print(df_history)
 
 def read_time_series_monthly(sym):
     # Set number formatting for all dataframes to display as X.XX
@@ -343,6 +346,7 @@ def read_time_series_monthly(sym):
 
     # Historical Price data: TIME_SERIES_MONTHLY_ADJUSTED - read and setup dataframe
     func = "TIME_SERIES_MONTHLY_ADJUSTED"
+    # uncomment this line to return json response data directly
     data = json.dumps(lookup(sym, func))
 
     # uncomment the following 3 lines to read data from json files
