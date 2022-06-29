@@ -21,6 +21,11 @@ def usd(value):
     return f"${value:,.2f}"
 
 
+def pct(value):
+    """Format value as percentage with 1 decimal."""
+    return f"{(100 * value):,.1f}%"
+
+
 def apology(message, code=400):
     """Render message as an apology to user."""
     def escape(s):
@@ -447,4 +452,4 @@ def sticker_price(df_financials, df_overview):
     stickerPrice = futureMarketPrice / 4
     safePrice = stickerPrice / 2
 
-    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}")
+    return float(f"{stickerPrice:.2f}"), float(f"{safePrice:.2f}"), analystGrowthRate, growthRate
