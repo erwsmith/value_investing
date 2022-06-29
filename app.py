@@ -77,9 +77,8 @@ def evaluate():
         df_history, df_growth = growth(df)
         df_growth.drop("EPS", inplace=True)
         df_growth.fillna("-", inplace=True)
-        # df_growth.drop([2017], axis=1, inplace=True)
         df_overview = read_overview(sym)
-        stickerPrice, safePrice = sticker_price(df, df_overview)
+        stickerPrice, safePrice, analystGrowthRate, growth_rate = sticker_price(df, df_overview)
 
         discount = 1 - (price / stickerPrice)
         if stickerPrice > 0 and discount > 0:
@@ -111,7 +110,9 @@ def evaluate():
 
         return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
                                growth_message=growth_message, management_message=management_message, 
-                               tables=[df_mgt.to_html(classes='data'), df_history.to_html(classes='data'), df_growth.to_html(classes='data')], 
+                               analystGrowthRate=pct(analystGrowthRate), growth_rate=pct(growth_rate), 
+                               tables=[df_mgt.to_html(classes='data'), df_history.to_html(classes='data'), 
+                               df_growth.to_html(classes='data')], 
                                titles=["na", "Management", "History", "Growth"], stickerPrice=usd(stickerPrice), 
                                safePrice=usd(safePrice), undervalued=undervalued, 
                                fullyDiscounted=fullyDiscounted)
