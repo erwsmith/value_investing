@@ -109,10 +109,10 @@ def evaluate():
             management_message = "not wonderful"
 
         return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
-                               growth_message=growth_message, management_message=management_message, 
-                               analystGrowthRate=pct(analystGrowthRate), growth_rate=pct(growth_rate), 
-                               tables=[df_mgt.to_html(classes='data'), df_history.to_html(classes='data'), 
-                               df_growth.to_html(classes='data')], 
+                               growth_message=growth_message, management_message=management_message,
+                               discount=pct(discount), analystGrowthRate=pct(analystGrowthRate), 
+                               growth_rate=pct(growth_rate), tables=[df_mgt.to_html(classes='data'), 
+                               df_history.to_html(classes='data'), df_growth.to_html(classes='data')], 
                                titles=["na", "Management", "History", "Growth"], stickerPrice=usd(stickerPrice), 
                                safePrice=usd(safePrice), undervalued=undervalued, 
                                fullyDiscounted=fullyDiscounted)
