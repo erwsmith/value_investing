@@ -78,9 +78,15 @@ def evaluate():
         df_growth.drop("EPS", inplace=True)
         df_growth.fillna("-", inplace=True)
         df_overview = read_overview(sym)
-        stickerPrice, safePrice, analystGrowthRate, growth_rate = sticker_price(df, df_overview)
+        stickerPrice, safePrice, analystGrowthRate, growthRate = sticker_price(df, df_overview)
 
+        # TODO what does this do?
+        df_mgt.index.name = None
+        df_growth.index.name = None
+
+        # Calculate some final evaluation figures and buy rating
         discount = 1 - (price / stickerPrice)
+
         if stickerPrice > 0 and discount > 0:
             undervalued = True
         else:
@@ -91,11 +97,7 @@ def evaluate():
         else:
             fullyDiscounted = False
 
-        # TODO what does this do?
-        df_mgt.index.name = None
-        df_growth.index.name = None
-
-        # Company growth check
+        # Company growth and mgt checks: 
         growth_check = df_growth["pass"].all()
 
         if growth_check:
@@ -108,12 +110,32 @@ def evaluate():
         else:
             management_message = "not wonderful"
 
-        return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), 
+        # Calculate buy rating
+        rating = "Uncertain"
+        
+        if growth_check and management_check:
+            if discount >= .5:
+                rating = "Fully Discounted! Very Strong Buy!"
+            elif discount >= .3:
+                rating = "Strong Buy"
+            elif discount >= .15:
+                rating = "Buy"
+            elif discount >= .05:
+                rating = "Consider Buying"
+            elif -.10 < discount < .05:
+                rating = "Hold"
+            else:
+                rating = "Consider Selling"
+
+
+
+        # Send all the data to evaluated.html
+        return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), rating=rating,
                                growth_message=growth_message, management_message=management_message,
                                discount=pct(discount), analystGrowthRate=pct(analystGrowthRate), 
-                               growth_rate=pct(growth_rate), tables=[df_mgt.to_html(classes='data'), 
-                               df_history.to_html(classes='data'), df_growth.to_html(classes='data')], 
-                               titles=["na", "Management", "History", "Growth"], stickerPrice=usd(stickerPrice), 
+                               growthRate=pct(growthRate), tables=[df_mgt.to_html(classes='data'), 
+                               df_growth.to_html(classes='data'), df_history.to_html(classes='data')],
+                               titles=["na", "Management", "Growth", "History"], stickerPrice=usd(stickerPrice), 
                                safePrice=usd(safePrice), undervalued=undervalued, 
                                fullyDiscounted=fullyDiscounted)
 
