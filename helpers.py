@@ -332,6 +332,7 @@ def growth(df_financials):
     df_history.insert(0, "Revenue (Mil)", df_history["totalRevenue"] / 1_000_000)
     df_history.insert(0, "Cashflow (Mil)", df_history["operatingCashflow"] / 1_000_000)
     df_history = df_history.drop(columns=["totalRevenue", "operatingCashflow"]).astype(object).transpose()
+    df_history["avg"] = df_history.mean(axis=1)
     
     # setup growth rate dataframe
     df_growth = df[["EPS", "cashflow_growth", "revenue_growth", "EPS_growth", "BVPS_growth"]]
@@ -414,7 +415,7 @@ def sticker_price(df_financials, df_overview):
 
     # get BVPS growth rate from growth()
     _, df_growth = growth(df_financials)
-    BVPSGrowthRate = df_growth.loc["BVPS_growth", "avg_growth"]
+    BVPSGrowthRate = (df_growth.loc["BVPS_growth", "avg_growth"]) / 100
 
     # get from alphavantage OVERVIEW
     currentEPS = float(df_overview.loc[0, "EPS"])
