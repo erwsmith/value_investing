@@ -6,14 +6,16 @@
 
 {% block main %}
 
-    <h1 class="text-center">{{ name }} ({{ sym }})</h1>
+    <h1 class="text-start">{{ name }} ({{ sym }})</h1>
+    <h1 class="text-start">{{ price }}</h1>
+    <h1 class="text-start">{{ rating }}</h1>
 
     <div class="row justify-content-center"></div>
         <div class="col-auto"></div>
             <table class="table table-responsive">
                 <tr>
-                    <td class="text-start">Current price</td>
-                    <td class="text-end">{{ price }}</td>
+                    <td class="text-start">Discount</td>
+                    <td class="text-end">{{ discount }}</td>
                 </tr>
                 <tr>
                     <td class="text-start">Sticker Price</td>
@@ -25,32 +27,20 @@
                     <td class="text-end">{{ safePrice }}</td>
                 </tr>
                 <tr>
-                    <td class="text-start">Management rating</td>
-                    <td class="text-end">{{ management_message }}</td>
-                </tr>
-                <tr>
-                    <td class="text-start">Growth rating</td>
-                    <td class="text-end">{{ growth_message }}</td>
-                </tr>
-                <tr>
-                    <td class="text-start">Yahoo Analyst Growth Rate</td>
+                    <td class="text-start">Analyst Growth Rate</td>
                     <td class="text-end">{{ analystGrowthRate }}</td>
                 </tr>
                 <tr>
-                    <td class="text-start">My estimated Growth Rate</td>
-                    <td class="text-end">{{ growth_rate }}</td>
+                    <td class="text-start">My Estimated Growth Rate</td>
+                    <td class="text-end">{{ growthRate }}</td>
                 </tr>
                 <tr>
-                    <td class="text-start">Undervalued</td>
-                    <td class="text-end">{{ undervalued }}</td>
+                    <td class="text-start">Management evaluation</td>
+                    <td class="text-end">{{ management_message }}</td>
                 </tr>
                 <tr>
-                    <td class="text-start">Discount</td>
-                    <td class="text-end">{{ discount }}</td>
-                </tr>
-                <tr>
-                    <td class="text-start">Fully Discounted</td>
-                    <td class="text-end">{{ fullyDiscounted }}</td>
+                    <td class="text-start">Growth evaluation</td>
+                    <td class="text-end">{{ growth_message }}</td>
                 </tr>
             </table>
         </div>
