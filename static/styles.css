@@ -5,6 +5,10 @@ nav .navbar-brand
 }
 
 /* Colors for brand */
+nav .navbar-brand .crimson
+{
+    color: crimson;
+}
 nav .navbar-brand .blue
 {
     color: #537fbe;
