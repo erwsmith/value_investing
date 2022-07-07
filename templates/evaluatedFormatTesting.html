@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Evaluated Format Testing
+{% endblock %}
+
+{% block main %}
+
+<h1>Microsoft Corporation</h1>
+<h2 style="color:green">$268.11</h2>
+
+<!-- <div class="row justify-content-center"></div>
+    <div class="col-md-4"></div> -->
+        <table class="table table-responsive">
+            <tr>
+                <td class="text-start" style="width: 33%">Fair Value</td>
+                <td class="text-start" style="width: 33%">Discount</td>
+                <td class="text-start" style="width: 33%">Growth Est</td>
+            </tr>
+            <tr>
+                <th class="text-start">$253.66</th>
+                <th class="text-start">-5.7%</th>
+                <th class="text-start">16.1%</th>
+            </tr>
+            <!-- <tr>
+                <td class="text-start">Safe Price</td>
+                <td class="text-end">$126.83</td>
+            </tr>
+            <tr>
+                <td class="text-start">My Estimated Growth Rate</td>
+                <td class="text-end">14.1%</td>
+            </tr>
+            <tr>
+                <td class="text-start">Management evaluation</td>
+                <td class="text-end">WONDERFUL!</td>
+            </tr>
+            <tr>
+                <td class="text-start">Growth evaluation</td>
+                <td class="text-end">WONDERFUL!</td>
+            </tr> -->
+        </table>
+        <table class="table table-responsive">
+            <tr>
+                <td class="text-start" style="width: 33%">Mgmt Hist</td>
+                <td class="text-start" style="width: 33%">Growth Hist</td>
+                <td class="text-start" style="width: 33%">Rating</td>
+            </tr>
+            <tr>
+                <th class="text-start">Wonderful</th>
+                <th class="text-start">Wonderful</th>
+                <th class="text-start">Hold</th>
+            </tr>
+        </table>
+    <!-- </div>
+</div> -->
+
+<br>
+
+<h2>Management</h2>
+        <table class="dataframe data">
+  <thead>
+    <tr style="text-align: right">
+      <th>year</th>
+      <th>2017</th>
+      <th>2018</th>
+      <th>2019</th>
+      <th>2020</th>
+      <th>2021</th>
+      <th>5y_average</th>
+      <th>pass</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>de_ratio</th>
+      <td>1.85</td>
+      <td>2.13</td>
+      <td>1.80</td>
+      <td>1.55</td>
+      <td>1.35</td>
+      <td>1.74</td>
+      <td>True</td>
+      <td>0 &lt; de ratio &lt; 5</td>
+    </tr>
+    <tr>
+      <th>current_ratio</th>
+      <td>2.11</td>
+      <td>2.23</td>
+      <td>2.43</td>
+      <td>2.87</td>
+      <td>3.17</td>
+      <td>2.56</td>
+      <td>True</td>
+      <td>1 &lt; current ratio</td>
+    </tr>
+    <tr>
+      <th>durability</th>
+      <td>2.46</td>
+      <td>2.36</td>
+      <td>1.89</td>
+      <td>1.40</td>
+      <td>1.04</td>
+      <td>1.83</td>
+      <td>True</td>
+      <td>0 &lt; durability &lt; 3</td>
+    </tr>
+    <tr>
+      <th>roic</th>
+      <td>15.75</td>
+      <td>10.83</td>
+      <td>23.05</td>
+      <td>24.06</td>
+      <td>29.06</td>
+      <td>20.55</td>
+      <td>True</td>
+      <td>10 &lt; roic %</td>
+    </tr>
+  </tbody>
+</table>
+    
+        <h2>Growth</h2>
+        <table class="dataframe data">
+  <thead>
+    <tr style="text-align: right;">
+      <th>year</th>
+      <th>2017</th>
+      <th>2018</th>
+      <th>2019</th>
+      <th>2020</th>
+      <th>2021</th>
+      <th>avg_growth</th>
+      <th>pass</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>cashflow_growth</th>
+      <td>-</td>
+      <td>11.08</td>
+      <td>18.92</td>
+      <td>16.27</td>
+      <td>26.48</td>
+      <td>18.19</td>
+      <td>True</td>
+      <td>avg_growth &gt; 10%</td>
+    </tr>
+    <tr>
+      <th>revenue_growth</th>
+      <td>-</td>
+      <td>11.03</td>
+      <td>15.18</td>
+      <td>13.77</td>
+      <td>18.10</td>
+      <td>14.52</td>
+      <td>True</td>
+      <td>avg_growth &gt; 10%</td>
+    </tr>
+    <tr>
+      <th>EPS_growth</th>
+      <td>-</td>
+      <td>-34.73</td>
+      <td>137.85</td>
+      <td>13.92</td>
+      <td>39.33</td>
+      <td>39.09</td>
+      <td>True</td>
+      <td>avg_growth &gt; 10%</td>
+    </tr>
+    <tr>
+      <th>BVPS_growth</th>
+      <td>-</td>
+      <td>-5.31</td>
+      <td>24.26</td>
+      <td>16.71</td>
+      <td>20.85</td>
+      <td>14.13</td>
+      <td>True</td>
+      <td>avg_growth &gt; 10%</td>
+    </tr>
+  </tbody>
+</table>
+    
+        <h2>History</h2>
+        <table class="dataframe data">
+  <thead>
+    <tr style="text-align: right;">
+      <th>year</th>
+      <th>2017</th>
+      <th>2018</th>
+      <th>2019</th>
+      <th>2020</th>
+      <th>2021</th>
+      <th>avg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Cashflow (Mil)</th>
+      <td>39,507.00</td>
+      <td>43,884.00</td>
+      <td>52,185.00</td>
+      <td>60,675.00</td>
+      <td>76,740.00</td>
+      <td>54,598.20</td>
+    </tr>
+    <tr>
+      <th>Revenue (Mil)</th>
+      <td>96,571.00</td>
+      <td>107,222.00</td>
+      <td>123,495.00</td>
+      <td>140,503.00</td>
+      <td>165,936.00</td>
+      <td>126,745.40</td>
+    </tr>
+    <tr>
+      <th>EPS</th>
+      <td>3.31</td>
+      <td>2.16</td>
+      <td>5.13</td>
+      <td>5.85</td>
+      <td>8.15</td>
+      <td>4.92</td>
+    </tr>
+    <tr>
+      <th>BVPS</th>
+      <td>11.38</td>
+      <td>10.77</td>
+      <td>13.39</td>
+      <td>15.63</td>
+      <td>18.88</td>
+      <td>14.01</td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

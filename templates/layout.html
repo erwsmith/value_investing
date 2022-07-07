@@ -11,11 +11,10 @@
             function loading(){
                 $("#loading").show();
                 $("#content").hide();       
-            } 
+            }
         // ]]></script>
 
         <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
         <link href="/static/styles.css" rel="stylesheet">
         
         <title>Value Investing: {% block title %}{% endblock %}</title>
@@ -25,7 +24,7 @@
 
         <nav class="bg-light border navbar navbar-expand-md navbar-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/"><span class="green">Value Investing</span></a>
+                <a class="navbar-brand" href="/"><span class="blue">Value Investing</span></a>
                 <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -34,7 +33,7 @@
                         <ul class="navbar-nav me-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/evaluate">Evaluate</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="/historicalData">Data</a></li> -->
-                            <!-- <li class="nav-item"><a class="nav-link" href="/favicon_test">favicon_test</a></li> -->
+                            <li class="nav-item"><a class="nav-link" href="/evaluatedFormatTesting">evaluatedFormatTesting</a></li>
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>

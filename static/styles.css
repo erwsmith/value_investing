@@ -29,8 +29,16 @@ nav .navbar-brand .green
 h1 {
     text-align: left;
     max-width: 750px;
-    margin-left: auto;
-    margin-right: auto;
+    /* margin-left: auto;
+    margin-right: auto; */
+    margin-bottom: 20px;
+}
+
+h2 {
+    text-align: left;
+    max-width: 750px;
+    /* margin-left: auto;
+    margin-right: auto; */
     margin-bottom: 20px;
 }
 
@@ -61,21 +69,25 @@ blockquote {
 }
 
 table.dataframe, .dataframe th, .dataframe td {
-    border: none;
+    border: 1px solid #C8C8C8;
     border-bottom: 1px solid #C8C8C8;
     border-collapse: collapse;
     text-align:left;
-    padding: 10px;
+    padding-left: 6px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     margin-bottom: 50px;
-    margin-left: auto;
-    margin-right: auto;
     font-size: 1em;
   }
 
 .table {
-    margin: auto;
+    border: 0px solid white;
     width: 30% !important;
-    margin-bottom: 50px;
+    padding-left: 6px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 div#loading {

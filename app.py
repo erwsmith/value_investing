@@ -52,10 +52,11 @@ def fav():
     return send_from_directory(app.static_folder, 'favicon.ico')
 
 
-@app.route("/favicon_test")
+@app.route("/evaluatedFormatTesting")
 @login_required
-def favicon_test():
-    return render_template("favicon_test.html")
+def evaluatedFormatTesting():
+    return render_template("evaluatedFormatTesting.html")
+
 
 # @app.route("/historicalData", methods=["GET", "POST"])
 # @login_required
