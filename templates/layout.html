@@ -13,7 +13,9 @@
                 $("#content").hide();       
             } 
         // ]]></script>
-        <link href="/static/favicon.ico" rel="icon">
+
+        <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
         <link href="/static/styles.css" rel="stylesheet">
         
         <title>Value Investing: {% block title %}{% endblock %}</title>
@@ -32,6 +34,7 @@
                         <ul class="navbar-nav me-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/evaluate">Evaluate</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="/historicalData">Data</a></li> -->
+                            <li class="nav-item"><a class="nav-link" href="/favicon_test">favicon_test</a></li>
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>

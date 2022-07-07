@@ -1,6 +1,6 @@
 import os
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, send_from_directory
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -8,7 +8,7 @@ from configparser import ConfigParser
 from helpers import *
 
 # Configure application
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -44,6 +44,18 @@ def index():
     """Show project readme"""
     return render_template("index.html")
 
+
+@app.route("/static/favicon.ico")
+@login_required
+def fav():
+    print(os.path.join(app.root_path, 'static'))
+    return send_from_directory(app.static_folder, 'favicon.ico')
+
+
+@app.route("/favicon_test")
+@login_required
+def favicon_test():
+    return render_template("favicon_test.html")
 
 # @app.route("/historicalData", methods=["GET", "POST"])
 # @login_required
