@@ -114,14 +114,14 @@ def evaluate():
         growth_check = df_growth["pass"].all()
 
         if growth_check:
-            growth_message = "WONDERFUL!"
+            growth_message = "Wonderful!"
         else:
-            growth_message = "not wonderful"
+            growth_message = "Not wonderful"
 
         if management_check:
-            management_message = "WONDERFUL!"
+            management_message = "Wonderul!"
         else:
-            management_message = "not wonderful"
+            management_message = "Not wonderful"
 
         # Calculate buy rating
         rating = "Uncertain"
