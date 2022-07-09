@@ -7,36 +7,45 @@
 {% block main %}
 
     <h1 class="text-start">{{ name }} ({{ sym }})</h1>
-    <h1 class="text-start">{{ price }}</h1>
-    <h1 class="text-start">{{ rating }}</h1>
 
-    <div class="row justify-content-center"></div>
-        <div class="col-md-4"></div>
-            <table class="table table-responsive">
-                <tr>
-                    <td class="text-start">Discount</td>
-                    <td class="text-end">{{ discount }}</td>
-                </tr>
-                <tr>
-                    <td class="text-start">Sticker Price</td>
-                    <td class="text-end"> {{ stickerPrice }}
-                    </td>
-                </tr>
-                <!-- <tr>
-                    <td class="text-start">Safe Price</td>
-                    <td class="text-end">{{ safePrice }}</td>
-                </tr> -->
-                <tr>
-                    <td class="text-start">Analyst Growth Rate</td>
-                    <td class="text-end">{{ analystGrowthRate }}</td>
-                </tr>
-                <!-- <tr>
-                    <td class="text-start">My Estimated Growth Rate</td>
-                    <td class="text-end">{{ growthRate }}</td>
-                </tr> -->
-            </table>
-        </div>
-    </div>
+    <h2 style="color:green">{{ price }}</h2>
+
+    <table class="table table-responsive-lg">
+        <tr style="width: 100%">
+          <td class="text-start" style="width: 33%">Fair Value</td>
+          <td class="text-start" style="width: 33%">Discount</td>
+          <td class="text-start" style="width: 33%">Growth Est</td>
+        </tr>
+        <tr>
+          <th class="text-start">{{ stickerPrice }}</th>
+          <th class="text-start">{{ discount }}</th>
+          <th class="text-start">{{ analystGrowthRate }}</th>
+        </tr>
+    </table>
+
+    <table class="table table-responsive-lg">
+        <tr>
+            <td class="text-start" style="width: 33%">Rating</td>
+            <td class="text-start" style="width: 33%">Mgmt History</td>
+            <td class="text-start" style="width: 33%">Growth History</td>
+        </tr>
+        <tr>
+            <th class="text-start">{{ rating }}</th>
+            <th class="text-start">{{ management_message }}</th>
+            <th class="text-start">{{ growth_message }}</th>
+        </tr>
+    </table>
+
+    <!-- <table class="table table-responsive-lg">
+        <tr>
+            <td class="text-start" style="width: 33%">My Estimated Growth Rate</td>    
+            <td class="text-start" style="width: 33%">Safe Price</td>
+        </tr>
+        <tr>
+            <th class="text-start">{{ growthRate }}</th>
+            <th class="text-start">{{ safePrice }}</th>
+        </tr>
+    </table> -->
 
     {% for table in tables %}
         <h2>{{ titles[loop.index] }}</h2>
