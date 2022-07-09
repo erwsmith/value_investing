@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Evaluated Format Testing
+    Eval Format
 {% endblock %}
 
 {% block main %}
@@ -9,55 +9,36 @@
 <h1>Microsoft Corporation</h1>
 <h2 style="color:green">$268.11</h2>
 
-<!-- <div class="row justify-content-center"></div>
-    <div class="col-md-4"></div> -->
-        <table class="table table-responsive">
-            <tr>
-                <td class="text-start" style="width: 33%">Fair Value</td>
-                <td class="text-start" style="width: 33%">Discount</td>
-                <td class="text-start" style="width: 33%">Growth Est</td>
-            </tr>
-            <tr>
-                <th class="text-start">$253.66</th>
-                <th class="text-start">-5.7%</th>
-                <th class="text-start">16.1%</th>
-            </tr>
-            <!-- <tr>
-                <td class="text-start">Safe Price</td>
-                <td class="text-end">$126.83</td>
-            </tr>
-            <tr>
-                <td class="text-start">My Estimated Growth Rate</td>
-                <td class="text-end">14.1%</td>
-            </tr>
-            <tr>
-                <td class="text-start">Management evaluation</td>
-                <td class="text-end">WONDERFUL!</td>
-            </tr>
-            <tr>
-                <td class="text-start">Growth evaluation</td>
-                <td class="text-end">WONDERFUL!</td>
-            </tr> -->
-        </table>
-        <table class="table table-responsive">
-            <tr>
-                <td class="text-start" style="width: 33%">Mgmt Hist</td>
-                <td class="text-start" style="width: 33%">Growth Hist</td>
-                <td class="text-start" style="width: 33%">Rating</td>
-            </tr>
-            <tr>
-                <th class="text-start">Wonderful</th>
-                <th class="text-start">Wonderful</th>
-                <th class="text-start">Hold</th>
-            </tr>
-        </table>
-    <!-- </div>
-</div> -->
+<table class="table table-responsive-lg">
+  <tr>
+    <td class="text-start" style="width: 33%">Fair Value</td>
+    <td class="text-start" style="width: 33%">Discount</td>
+    <td class="text-start" style="width: 33%">Growth Est</td>
+  </tr>
+  <tr>
+    <th class="text-start">$253.66</th>
+    <th class="text-start">-5.7%</th>
+    <th class="text-start">16.1%</th>
+  </tr>
+</table>
+
+<table class="table table-responsive-lg">
+  <tr>
+    <td class="text-start" style="width: 33%">Mgmt History</td>
+    <td class="text-start" style="width: 33%">Growth History</td>
+    <td class="text-start" style="width: 33%">Rating</td>
+  </tr>
+  <tr>
+    <th class="text-start">Wonderful</th>
+    <th class="text-start">Wonderful</th>
+    <th class="text-start">Hold</th>
+  </tr>
+</table>
 
 <br>
 
 <h2>Management</h2>
-        <table class="dataframe data">
+<table class="dataframe data">
   <thead>
     <tr style="text-align: right">
       <th>year</th>
@@ -163,7 +144,7 @@
       <td>-34.73</td>
       <td>137.85</td>
       <td>13.92</td>
-      <td>39.33</td>
+      <td>39.50</td>
       <td>39.09</td>
       <td>True</td>
       <td>avg_growth &gt; 10%</td>
