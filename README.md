@@ -3,7 +3,7 @@ Stock Analysis for Value Investing
 
 * * *
 
-### [Video Demo](https://youtu.be/dQw4w9WgXcQ)
+### [Video Demo](https://youtu.be/VONilUJOLQI)
 
 * * *
 
