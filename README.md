@@ -73,10 +73,10 @@ From [investopedia.com](https://www.investopedia.com/terms/v/valueinvesting.asp)
 `growth()`
 
 *   This function calculates 4 key growth rates and returns them as a pandas dataframe:
-*   Sales (Revenue) Growth Rate.
-*   Earnings Per Share Growth Rate.
-*   Equity (BVPS) Growth Rate.
-*   Operating Cash Flow Growth Rate.
+    *   Sales (Revenue) Growth Rate.
+    *   Earnings Per Share Growth Rate.
+    *   Equity (BVPS) Growth Rate.
+    *   Operating Cash Flow Growth Rate.
 
 `read_time_series_monthly()`
 
