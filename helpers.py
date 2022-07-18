@@ -367,7 +367,8 @@ def read_time_series_monthly(sym):
     i = 0
 
     for i, date in enumerate(price_history["Monthly Adjusted Time Series"]):
-        if i == 0 or i % 12 == 0:
+        # TODO double check the resulting values from this!
+        if i == 0 or i % 11 == 0:
             price_history_dict[date] = price_history["Monthly Adjusted Time Series"][date]["5. adjusted close"]
             i += 1
             dates.append(date)
