@@ -234,8 +234,8 @@ def register():
         else:
             # Query database to see if username already exists
             un = request.form.get("username")
-            pw = request.form.get("password")
-            pw_hash = generate_password_hash(pw)
+            # pw = request.form.get("password")
+            pw_hash = generate_password_hash(request.form.get("password"))
 
             if db.execute("SELECT * FROM users WHERE username = ?", un):
                 return apology("username already exists", 400)
