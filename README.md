@@ -93,14 +93,14 @@ From [investopedia.com](https://www.investopedia.com/terms/v/valueinvesting.asp)
 
 *   This function takes in the financial reports and overview dataframes and returns the company's sticker price and "safe price"
 *   In order to find the sticker price, the following numbers are required:
-*   Current EPS (TTM EPS).
-*   Future EPS growth rate (estimated).
-*   This is based primarily on historical Equity (BVPS) growth rate, then on EPS, Sales, & Cash Flow growth rates.
-*   Compare to analyst’s 5 year growth projection obtained in yahoo\_growth(), use the lower of the 2.
-*   Future PE (estimated).
-*   Default future PE = EPS growth rate estimate x 2.
-*   Compare Default future PE to historical average PE, use lower of the 2.
-*   Minimum Acceptable Rate of Return % (Rule #1 MARR = 15%).
+    *   Current EPS (TTM EPS).
+    *   Future EPS growth rate (estimated).
+    *   This is based primarily on historical Equity (BVPS) growth rate, then on EPS, Sales, & Cash Flow growth rates.
+    *   Compare to analyst’s 5 year growth projection obtained in yahoo\_growth(), use the lower of the 2.
+    *   Future PE (estimated).
+    *   Default future PE = EPS growth rate estimate x 2.
+        *   Compare Default future PE to historical average PE, use lower of the 2.
+    *   Minimum Acceptable Rate of Return % (Rule #1 MARR = 15%).
 *   The "safe price" is simply the sticker price / 2. It is the recommended maximum purchase price, representing a "safe" discount
 
   
