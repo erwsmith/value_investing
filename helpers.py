@@ -203,7 +203,7 @@ def read_financial_reports(sym):
     # Calculate effective tax rate
     df_income["effectiveTaxRate"] = df_income["incomeTaxExpense"] / df_income["incomeBeforeTax"]
 
-    # Calculate NOPAT
+    # Calculate NOPAT (Net operating profit after tax)
     # nopat = ebit * (1 - effective_tax_rate)
     df_income["nopat"] = df_income["ebit"] * (1 - df_income["effectiveTaxRate"])
 
