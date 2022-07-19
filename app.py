@@ -249,3 +249,134 @@ def register():
                 flash("Welcome, new user!")
                 # Redirect user to home page
                 return redirect("/")
+
+
+# Buy function
+@app.route("/buy", methods=["GET", "POST"])
+@login_required
+def buy():
+    """Buy shares of stock"""
+    if request.method == "GET":
+        return render_template("buy.html")
+
+    if request.method == "POST":
+        shares = request.form.get("shares")
+
+        if not shares.isdigit():
+            return apology("Not a valid number of shares", 400)
+        elif int(shares) < 0:
+            return apology("Not a valid number of shares", 400)
+
+        # get stock quote information
+        elif iex_get_quote(request.form.get("symbol")):
+            stock_quote = iex_get_quote(request.form.get("symbol"))
+            name = stock_quote["name"]
+            symbol = stock_quote["symbol"]
+            price = float(stock_quote["price"])
+            shares = float(shares)
+            ext_cost = float(shares * price)
+            cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+
+            # check if user can afford stocks
+            if ext_cost > cash:
+                return apology("Insufficient funds")
+            else:
+                # successful purchase, update db: subtract ext_cost from cash
+                cash -= ext_cost
+                db.execute("UPDATE users SET cash = ? WHERE id = ?", cash, session["user_id"])
+
+                # add to existing holding in holdings table
+                if db.execute("SELECT symbol FROM holdings WHERE owner_id = ? AND symbol = ?", session["user_id"], symbol):
+                    # increase number of shares held and update value in db
+                    shares_owned = shares + db.execute("SELECT shares FROM holdings WHERE owner_id = ? AND symbol = ?",
+                                                       session["user_id"], symbol)[0]["shares"]
+                    owned_shares_value = ext_cost + db.execute("SELECT value FROM holdings WHERE owner_id = ? AND symbol = ?",
+                                                               session["user_id"], symbol)[0]["value"]
+                    # get new total value of stocks + cash from db
+                    db.execute("UPDATE holdings SET shares = ?, value = ? WHERE owner_id = ? AND symbol = ?",
+                               shares_owned, owned_shares_value, session["user_id"], symbol)
+                    value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?",
+                                                 session["user_id"])[0]['SUM(value)']
+                    total = cash + value_of_stocks
+                else:
+                    # add new holding row to holdings table
+                    db.execute("INSERT INTO holdings (symbol, cost, shares, value, owner_id, name) VALUES (?, ?, ?, ?, ?, ?)",
+                               symbol, price, shares, ext_cost, session["user_id"], name)
+                    value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?",
+                                                 session["user_id"])[0]['SUM(value)']
+                    total = cash + value_of_stocks
+
+                rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
+                # flash message when rendering index/portfolio page
+                flash(f"You have successfully purchased {int(shares)} shares of {name} for {usd(ext_cost)}!")
+                # redirect user to index/portfolio page
+                return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
+        else:
+            return apology("Not a valid symbol", 400)
+
+
+# Sell function
+@app.route("/sell", methods=["GET", "POST"])
+@login_required
+def sell():
+    """Sell shares of stock"""
+    if request.method == "GET":
+        symbols = db.execute("SELECT symbol FROM holdings WHERE owner_id = ?", session["user_id"])
+        return render_template("sell.html", symbols=symbols)
+
+    if request.method == "POST":
+        if iex_get_quote(request.form.get("symbol")):
+            stock_quote = iex_get_quote(request.form.get("symbol"))
+            name = stock_quote["name"]
+            symbol = stock_quote["symbol"]
+            price = float(stock_quote["price"])
+            shares = float(request.form.get("shares"))
+            ext_cost = float(shares * price)
+            cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+            shares_owned = db.execute("SELECT shares FROM holdings WHERE owner_id = ? AND symbol = ?",
+                                      session["user_id"], symbol)[0]["shares"]
+            owned_shares_value = db.execute("SELECT value FROM holdings WHERE owner_id = ? AND symbol = ?",
+                                            session["user_id"], symbol)[0]["value"]
+
+            # check if user can afford stocks
+            if shares > shares_owned:
+                return apology("Not enough shares")
+            else:
+                # successful sale, update db: add ext_cost to cash
+                cash += ext_cost
+                db.execute("UPDATE users SET cash = ? WHERE id = ?", cash, session["user_id"])
+                # decrease number of shares held and update value in db
+                shares_owned -= shares
+                owned_shares_value -= ext_cost
+                # get new total value of stocks + cash from db
+                db.execute("UPDATE holdings SET shares = ?, value = ? WHERE owner_id = ? AND symbol = ?",
+                           shares_owned, owned_shares_value, session["user_id"], symbol)
+                db.execute("DELETE FROM holdings WHERE shares = 0")
+                value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?",
+                                             session["user_id"])[0]['SUM(value)']
+                total = cash + value_of_stocks
+
+                rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
+                # flash message when rendering index/portfolio page
+                flash(f"You have successfully sold {int(shares)} shares of {name} for {usd(ext_cost)}!")
+                # redirect user to index/portfolio page
+                return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
+
+
+# Paper Trading History Route
+@app.route("/history")
+@login_required
+def history():
+    """Show portfolio of stocks"""
+    # get users current cash value from db
+    cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+    value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?", session["user_id"])[0]['SUM(value)']
+    # get list of all holdings
+    rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
+    if len(rows) > 0:
+        # get new total value of stocks + cash from db
+        total = cash + value_of_stocks
+        # render portfolio table
+        return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
+    else:
+        return render_template("history.html", cash=usd(cash), total=usd(cash))
