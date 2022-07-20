@@ -55,7 +55,6 @@ def login_required(f):
 
 def iex_get_quote(sym):
     """Look up quote for symbol."""
-
     # Contact iex API
     try:
         config = ConfigParser()
@@ -112,7 +111,6 @@ def read_financial_reports(sym):
     Read financial report json data and get values to be used for management and growth calculations
     Includes Balance Sheet, Income Statement, and Cash Flow Statement
     """
-
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
@@ -215,7 +213,6 @@ def read_financial_reports(sym):
 
 
 def read_overview(sym):
-
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
@@ -241,7 +238,6 @@ def management(df_financials):
     """
     Calculate values to check company management quality
     """
-
     # rename df for convenience
     df = df_financials
 
@@ -297,7 +293,6 @@ def growth(df_financials):
     """
     Calculate values to check company growth history
     """
-
     df = df_financials[["totalRevenue", "netIncome", "commonStockSharesOutstanding", "totalShareholderEquity", "operatingCashflow"]]
     df = df.sort_index()
 
@@ -388,7 +383,6 @@ def read_time_series_monthly(sym):
 
 def yahoo_growth(sym):
     """Use selenium to obtain analyst growth rate from yahoo finance"""
-
     # driver setup
     options = Options()
     options.headless = True
@@ -410,7 +404,6 @@ def sticker_price(df_financials, df_overview):
     """
     Calculate company "Sticker Price" or the estimated actual value, and the "Margin of Safety Price" to compare to current price
     """
-
     # Set number formatting for all dataframes to display as X.XX
     pd.options.display.float_format = '{:,.2f}'.format
 
