@@ -6,9 +6,9 @@
 
 {% block main %}
 
-    <h1 class="text-start">{{ name }} ({{ sym }})</h1>
+    <h1 class="text-start">{{ result.name }} ({{ result.sym }})</h1>
 
-    <h2 style="color:green">{{ price }}</h2>
+    <h2 style="color:green">{{ result.price }}</h2>
 
     <table class="table table-responsive-lg">
         <tr style="width: 100%">
@@ -17,9 +17,9 @@
           <td class="text-start" style="width: 33%">Growth Est</td>
         </tr>
         <tr>
-          <th class="text-start">{{ stickerPrice }}</th>
-          <th class="text-start">{{ discount }}</th>
-          <th class="text-start">{{ analystGrowthRate }}</th>
+          <th class="text-start">{{ result.stickerPrice }}</th>
+          <th class="text-start">{{ result.discount }}</th>
+          <th class="text-start">{{ result.analystGrowthRate }}</th>
         </tr>
     </table>
 
@@ -30,9 +30,9 @@
             <td class="text-start" style="width: 33%">Growth History</td>
         </tr>
         <tr>
-            <th class="text-start">{{ rating }}</th>
-            <th class="text-start">{{ management_message }}</th>
-            <th class="text-start">{{ growth_message }}</th>
+            <th class="text-start">{{ result.rating }}</th>
+            <th class="text-start">{{ result.management_message }}</th>
+            <th class="text-start">{{ result.growth_message }}</th>
         </tr>
     </table>
 
@@ -49,7 +49,7 @@
 
     {% for table in tables %}
         <h2>{{ titles[loop.index] }}</h2>
-        {{ table|safe }}
+        {{ table | safe }}
     {% endfor %}
 
 {% endblock %}
