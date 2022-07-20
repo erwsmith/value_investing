@@ -52,26 +52,11 @@ def fav():
     return send_from_directory(app.static_folder, 'favicon.ico')
 
 
-# @app.route("/evaluatedFormatTesting")
-# @login_required
-# def evaluatedFormatTesting():
-#     return render_template("evaluatedFormatTesting.html")
-
-
-# @app.route("/historicalData", methods=["GET", "POST"])
-# @login_required
-# def historicalData():
-#     if request.method == "GET":
-#         return render_template("historicalData.html")
-
-
 @app.route("/evaluate", methods=["GET", "POST"])
 @login_required
 def evaluate():
     """Lookup/calculate company price, growth rate, management numbers, and sticker price"""
-
     if request.method == "POST":
-
         try: 
             sym = request.form.get("symbol")
             stock_quote = iex_get_quote(sym)
@@ -122,8 +107,8 @@ def evaluate():
             management_message = "Not wonderful"
 
         # Calculate buy rating
+        # TODO this rating gradient system needs more consideration 
         rating = "Uncertain"
-        
         if growth_check and management_check:
             if discount >= .5:
                 rating = "Fully Discounted! Very Strong Buy!"
@@ -133,10 +118,17 @@ def evaluate():
                 rating = "Buy"
             elif discount >= .05:
                 rating = "Consider Buying"
-            elif -.10 < discount < .05:
+            elif 0 <= discount < .05:
                 rating = "Hold"
+            elif -.1 <= discount < 0:
+                rating = "Hold"
+                discount = 0
             else:
                 rating = "Consider Selling"
+                discount = 0
+        elif discount < -.1:
+            rating = "Consider Selling"
+            discount = 0
 
         # Collect result data 
         result = dict(
@@ -155,12 +147,12 @@ def evaluate():
             fullyDiscounted=fullyDiscounted
         )
 
-        # define tables list
+        # Define tables list
         tables = [df_mgt.to_html(classes='data'),
                   df_growth.to_html(classes='data'), 
                   df_history.to_html(classes='data')]
 
-        # set table titles
+        # Set table titles
         titles = ["na", "Management", "Growth", "History"]
 
         # Send data to evaluated.html
@@ -269,15 +261,12 @@ def register():
                 return redirect("/")
 
 
-# Buy function
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    if request.method == "GET":
-        return render_template("buy.html")
-
     if request.method == "POST":
+        
         shares = request.form.get("shares")
 
         if not shares.isdigit():
@@ -286,7 +275,7 @@ def buy():
             return apology("Not a valid number of shares", 400)
 
         # get stock quote information
-        elif iex_get_quote(request.form.get("symbol")):
+        try:
             stock_quote = iex_get_quote(request.form.get("symbol"))
             name = stock_quote["name"]
             symbol = stock_quote["symbol"]
@@ -326,24 +315,21 @@ def buy():
 
                 rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
                 # flash message when rendering index/portfolio page
-                flash(f"You have successfully purchased {int(shares)} shares of {name} for {usd(ext_cost)}!")
+                flash(f"You have successfully purchased {int(shares)} share(s) of {name} for {usd(ext_cost)}!")
                 # redirect user to index/portfolio page
                 return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
-        else:
-            return apology("Not a valid symbol", 400)
+        except:
+            return apology("Error retrieving quote from IEX", 400)
+    else:
+        return render_template("buy.html")
 
 
-# Sell function
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
     """Sell shares of stock"""
-    if request.method == "GET":
-        symbols = db.execute("SELECT symbol FROM holdings WHERE owner_id = ?", session["user_id"])
-        return render_template("sell.html", symbols=symbols)
-
     if request.method == "POST":
-        if iex_get_quote(request.form.get("symbol")):
+        try:
             stock_quote = iex_get_quote(request.form.get("symbol"))
             name = stock_quote["name"]
             symbol = stock_quote["symbol"]
@@ -376,25 +362,59 @@ def sell():
 
                 rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
                 # flash message when rendering index/portfolio page
-                flash(f"You have successfully sold {int(shares)} shares of {name} for {usd(ext_cost)}!")
+                flash(f"You have successfully sold {int(shares)} share(s) of {name} for {usd(ext_cost)}!")
                 # redirect user to index/portfolio page
                 return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
+        except:
+            return apology("Error retrieving quote from IEX", 400)
+    else:
+        symbols = db.execute("SELECT symbol FROM holdings WHERE owner_id = ?", session["user_id"])
+        return render_template("sell.html", symbols=symbols)
 
-
-# Paper Trading History Route
 @app.route("/history")
 @login_required
 def history():
     """Show portfolio of stocks"""
-    # get users current cash value from db
-    cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
-    value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?", session["user_id"])[0]['SUM(value)']
-    # get list of all holdings
-    rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
-    if len(rows) > 0:
-        # get new total value of stocks + cash from db
-        total = cash + value_of_stocks
-        # render portfolio table
-        return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
-    else:
-        return render_template("history.html", cash=usd(cash), total=usd(cash))
+    if request.method == "GET":
+        # get users current cash value from db
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+        value_of_stocks = db.execute("SELECT SUM(value) FROM holdings WHERE owner_id = ?", session["user_id"])[0]['SUM(value)']
+        # get list of all holdings
+        rows = db.execute("SELECT * FROM holdings where owner_id = ?", session["user_id"])
+        if len(rows) > 0:
+            # get new total value of stocks + cash from db
+            total = cash + value_of_stocks
+            # render portfolio table
+            return render_template("history.html", cash=usd(cash), total=usd(total), rows=rows)
+        else:
+            return render_template("history.html", cash=usd(cash), total=usd(cash))
+
+
+@app.route("/quote", methods=["GET", "POST"])
+@login_required
+def quote():
+    """Get a quick quote"""
+    if request.method == "POST":
+        try: 
+            symbol = request.form.get("symbol")
+            stock_quote = iex_get_quote(symbol)
+            name = stock_quote["name"]
+            price = usd(float(stock_quote["price"]))
+            return render_template("quoted.html", name=name, symbol=symbol, price=price)
+        except:
+            flash("Request failed. Is symbol valid?")
+    else: 
+        return render_template("quote.html")
+    
+
+# @app.route("/evaluatedFormatTesting")
+# @login_required
+# def evaluatedFormatTesting():
+#     return render_template("evaluatedFormatTesting.html")
+
+
+# @app.route("/historicalData", methods=["GET", "POST"])
+# @login_required
+# def historicalData():
+#     if request.method == "GET":
+#         return render_template("historicalData.html")
