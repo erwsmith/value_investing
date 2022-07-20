@@ -71,13 +71,13 @@ def evaluate():
     """Lookup/calculate company price, growth rate, management numbers, and sticker price"""
 
     if request.method == "POST":
-        sym = request.form.get("symbol")
 
-        if iex_get_quote(request.form.get("symbol")):
-            stock_quote = iex_get_quote(request.form.get("symbol"))
+        try: 
+            sym = request.form.get("symbol")
+            stock_quote = iex_get_quote(sym)
             name = stock_quote["name"]
             price = float(stock_quote["price"])
-        else:
+        except:
             flash("Request failed. Is symbol valid?")        
 
         # get financial reports dataframe
@@ -138,12 +138,11 @@ def evaluate():
             else:
                 rating = "Consider Selling"
 
-
-        # collect result data 
+        # Collect result data 
         result = dict(
-            name=name, 
-            price=usd(price), 
-            sym=sym.upper(), 
+            name=name,
+            price=usd(price),
+            sym=sym.upper(),
             rating=rating,
             growth_message=growth_message,
             management_message=management_message,
