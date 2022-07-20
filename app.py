@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from configparser import ConfigParser
 from helpers import *
 
-# Configure application
+# Configure Flask application
 app = Flask(__name__, static_folder="static")
 
 # Ensure templates are auto-reloaded
@@ -21,7 +21,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
+# configure to use SQLite database
 db = SQL("sqlite:///finance.db")
 
 # Make sure API key is set
@@ -52,10 +52,10 @@ def fav():
     return send_from_directory(app.static_folder, 'favicon.ico')
 
 
-@app.route("/evaluatedFormatTesting")
-@login_required
-def evaluatedFormatTesting():
-    return render_template("evaluatedFormatTesting.html")
+# @app.route("/evaluatedFormatTesting")
+# @login_required
+# def evaluatedFormatTesting():
+#     return render_template("evaluatedFormatTesting.html")
 
 
 # @app.route("/historicalData", methods=["GET", "POST"])
@@ -69,8 +69,6 @@ def evaluatedFormatTesting():
 @login_required
 def evaluate():
     """Lookup/calculate company price, growth rate, management numbers, and sticker price"""
-    if request.method == "GET":
-        return render_template("evaluate.html")
 
     if request.method == "POST":
         sym = request.form.get("symbol")
@@ -141,16 +139,37 @@ def evaluate():
                 rating = "Consider Selling"
 
 
+        # collect result data 
+        result = dict(
+            name=name, 
+            price=usd(price), 
+            sym=sym.upper(), 
+            rating=rating,
+            growth_message=growth_message,
+            management_message=management_message,
+            discount=pct(discount),
+            analystGrowthRate=pct(analystGrowthRate),
+            growthRate=pct(growthRate),
+            stickerPrice=usd(stickerPrice),
+            safePrice=usd(safePrice),
+            undervalued=undervalued,
+            fullyDiscounted=fullyDiscounted
+        )
 
-        # Send all the data to evaluated.html
-        return render_template('evaluated.html', name=name, price=usd(price), sym=sym.upper(), rating=rating,
-                               growth_message=growth_message, management_message=management_message,
-                               discount=pct(discount), analystGrowthRate=pct(analystGrowthRate), 
-                               growthRate=pct(growthRate), tables=[df_mgt.to_html(classes='data'), 
-                               df_growth.to_html(classes='data'), df_history.to_html(classes='data')],
-                               titles=["na", "Management", "Growth", "History"], stickerPrice=usd(stickerPrice), 
-                               safePrice=usd(safePrice), undervalued=undervalued, 
-                               fullyDiscounted=fullyDiscounted)
+        # define tables list
+        tables = [df_mgt.to_html(classes='data'),
+                  df_growth.to_html(classes='data'), 
+                  df_history.to_html(classes='data')]
+
+        # set table titles
+        titles = ["na", "Management", "Growth", "History"]
+
+        # Send data to evaluated.html
+        return render_template('evaluated.html', result=result, tables=tables, titles=titles)
+    
+    # if request.method is not post
+    else:
+        return render_template("evaluate.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
