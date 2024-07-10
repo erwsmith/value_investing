@@ -1,12 +1,12 @@
 beautifulsoup4==4.11.1
 cs50==9.0.0
 Flask==2.1.2
+flask_session==0.8.0
 matplotlib==3.5.2
 numpy==1.22.1
 pandas==1.4.0
 python_dateutil==2.8.2
-requests==2.27.1
+Requests==2.32.3
 requests_random_user_agent==2022.1.23
-selenium==4.2.0
+selenium==4.22.0
 Werkzeug==2.1.2
-yahoofinancials==1.6
